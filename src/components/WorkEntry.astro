@@ -1,0 +1,201 @@
+---
+// ============================================================================
+// Reusable project entry
+// ============================================================================
+import PrimaryBtn from './PrimaryBtn.astro';
+import WorkThumbnail from './WorkThumbnail.astro';
+import type { WorkProject } from '../types/work';
+
+interface Props {
+    work: WorkProject;
+    titleIdPrefix?: string;
+}
+
+const { work, titleIdPrefix = 'work-title' } = Astro.props;
+const titleId = `${titleIdPrefix}-${work.id}`;
+---
+
+<li class="work-collection__item" data-work-item>
+    <article class="work-entry" aria-labelledby={titleId}>
+        <div class="work-entry__media">
+            <WorkThumbnail
+                id={work.id}
+                href={work.href}
+                projectTitle={work.title}
+                sketch={work.thumbnail.sketch}
+                image={work.thumbnail.image}
+                imageAlt={work.thumbnail.alt}
+            />
+        </div>
+
+        <div class="work-entry__content">
+            <h3 id={titleId}>
+                <span class="work-entry__title-text">{work.title}</span>
+            </h3>
+            <p class="work-entry__summary">
+                <span class="work-entry__summary-text">{work.summary}</span>
+            </p>
+            <PrimaryBtn
+                href={work.href}
+                class="work-entry__button"
+                aria-describedby={titleId}
+                data-case-study-link
+            >
+                View Case Study
+            </PrimaryBtn>
+        </div>
+    </article>
+</li>
+
+<style>
+    /* ======================================================================
+       List-view entry layout
+       ====================================================================== */
+    .work-entry {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: 'media content';
+        align-items: center;
+        gap: var(--work-list-column-gap);
+    }
+
+    .work-entry__media {
+        grid-area: media;
+        min-width: 0;
+    }
+
+    .work-entry__content {
+        grid-area: content;
+        align-self: center;
+        min-width: 0;
+        transform: translateY(var(--work-content-grid-offset, 0));
+    }
+
+    .work-entry__content > h3 {
+        line-height: var(--grid-size);
+    }
+
+    .work-entry__title-text,
+    .work-entry__summary-text {
+        position: relative;
+    }
+
+    .work-entry__summary {
+        max-width: var(--work-summary-max-width);
+        margin: var(--grid-size) 0 0;
+        line-height: var(--grid-size);
+        color: var(--gray-ink-color);
+    }
+
+    .work-entry__button {
+        margin-top: calc(var(--grid-size) * 2);
+    }
+
+    /* ======================================================================
+       View-switch transition states
+       ====================================================================== */
+    :global(.work-collection[data-work-transition='to-grid']) .work-entry__content,
+    :global(.work-collection[data-work-transition='to-list']) .work-entry__content {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    :global(.work-collection[data-work-transition]) .work-entry__media {
+        will-change: transform;
+    }
+
+    @keyframes work-entry-content-reveal {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    :global(.work-collection[data-work-reveal='true']) .work-entry__content {
+        animation: work-entry-content-reveal var(--motion-work-view-duration)
+            var(--motion-work-view-ease) both;
+    }
+
+    /* ======================================================================
+       Linked thumbnail hover synchronization
+       ====================================================================== */
+    .work-entry[data-work-action-active] :global(.work-thumbnail) {
+        transform: rotate(0) scale(var(--work-thumbnail-zoom));
+    }
+
+    .work-entry[data-work-action-active] :global(.work-thumbnail__polaroid) {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s;
+    }
+
+    .work-entry[data-work-action-active] :global(.work-thumbnail__image--sketch) {
+        opacity: 0;
+    }
+
+    .work-entry[data-work-action-active] :global(.work-thumbnail__image--finished) {
+        opacity: 1;
+    }
+
+    @supports selector(:has(*)) {
+        .work-entry:has(.work-entry__button:hover) :global(.work-thumbnail),
+        .work-entry:has(.work-entry__button:focus-visible) :global(.work-thumbnail) {
+            transform: rotate(0) scale(var(--work-thumbnail-zoom));
+        }
+
+        .work-entry:has(.work-entry__button:hover) :global(.work-thumbnail__polaroid),
+        .work-entry:has(.work-entry__button:focus-visible) :global(.work-thumbnail__polaroid) {
+            visibility: visible;
+            opacity: 1;
+            transition-delay: 0s;
+        }
+
+        .work-entry:has(.work-entry__button:hover) :global(.work-thumbnail__image--sketch),
+        .work-entry:has(.work-entry__button:focus-visible) :global(.work-thumbnail__image--sketch) {
+            opacity: 0;
+        }
+
+        .work-entry:has(.work-entry__button:hover) :global(.work-thumbnail__image--finished),
+        .work-entry:has(.work-entry__button:focus-visible)
+            :global(.work-thumbnail__image--finished) {
+            opacity: 1;
+        }
+    }
+
+    /* ======================================================================
+       Grid-view entry layout
+       ====================================================================== */
+    :global([data-work-view='grid']) .work-entry {
+        display: block;
+    }
+
+    :global([data-work-view='grid']) .work-entry__content {
+        display: none;
+        text-align: center;
+        transform: none;
+    }
+
+    @media (max-width: 64rem) {
+        .work-entry {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                'media'
+                'content';
+            gap: var(--work-list-mobile-entry-gap);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(.work-collection[data-work-transition]) .work-entry__content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        :global(.work-collection[data-work-reveal='true']) .work-entry__content {
+            animation: none;
+            opacity: 1;
+        }
+    }
+</style>

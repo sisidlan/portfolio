@@ -1,0 +1,13 @@
+---
+// ============================================================================
+// Primary link-button API
+// ============================================================================
+import ButtonLink from './ButtonLink.astro';
+import type { ButtonLinkProps } from '../types/button';
+
+type Props = ButtonLinkProps;
+---
+
+<ButtonLink {...Astro.props} variant="primary">
+    <slot />
+</ButtonLink>

@@ -1,0 +1,59 @@
+<footer class="site-footer">
+    <svg class="site-footer__corner" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M0 0H24V24A24 24 0 0 0 0 0Z" />
+    </svg>
+
+    <div class="site-footer__bar">
+        <div class="site-footer__bar-content">
+            <p class="caption site-footer__credit">
+                Designed and built by yours truly using Figma and Visual Studio Code.
+            </p>
+        </div>
+    </div>
+</footer>
+
+<style>
+    /* ======================================================================
+       Credit bar and page-edge artwork
+       ====================================================================== */
+    .site-footer {
+        position: relative;
+        flex-shrink: 0;
+        background-color: var(--black-ink-color);
+    }
+
+    .site-footer__bar {
+        display: flex;
+        align-items: center;
+        height: var(--footer-bar-height);
+    }
+
+    .site-footer__bar-content {
+        width: 100%;
+        max-width: var(--page-max-width);
+        margin: 0 auto;
+        padding-inline: var(--page-gutter);
+    }
+
+    .site-footer__corner {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% - var(--paper-corner-overlap));
+        display: block;
+        width: var(--paper-corner-radius);
+        height: var(--paper-corner-radius);
+        fill: var(--black-ink-color);
+        transform: scaleY(-1);
+        pointer-events: none;
+    }
+
+    .site-footer__credit {
+        color: var(--light-gray-ink-color);
+    }
+
+    @media (max-width: 48rem) {
+        .site-footer__bar-content {
+            padding-inline: var(--mobile-page-gutter);
+        }
+    }
+</style>

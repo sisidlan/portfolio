@@ -1,0 +1,82 @@
+---
+// ============================================================================
+// Shared label and SVG layers for primary and secondary buttons
+// ============================================================================
+interface Props {
+    variant: 'primary' | 'secondary';
+    includeDisabledHighlighter?: boolean;
+}
+
+const { variant, includeDisabledHighlighter = false } = Astro.props;
+---
+
+<span class="button__label">
+    <slot />
+</span>
+{variant === 'primary' && (
+    <>
+        <img
+            class="button__highlighter button__highlighter--enabled"
+            src="/images/highlighter.svg"
+            width="240"
+            height="187"
+            alt=""
+            aria-hidden="true"
+        />
+        {includeDisabledHighlighter && (
+            <img
+                class="button__highlighter button__highlighter--disabled"
+                src="/images/highlighter-gray.svg"
+                width="240"
+                height="187"
+                alt=""
+                aria-hidden="true"
+            />
+        )}
+    </>
+)}
+<svg
+    class="button__shadow button__shadow--default"
+    xmlns="http://www.w3.org/2000/svg"
+    width="190.3916"
+    height="51.3916"
+    viewBox="12.6084 12.6084 190.3916 51.3916"
+    fill="none"
+    aria-hidden="true"
+    focusable="false"
+>
+    <path
+        d="M190.391 12.6084C197.986 17.6161 203 26.2217 203 36C203 51.464 190.464 64 175 64H36C26.2217 64 17.6161 58.9862 12.6084 51.3906C17.0251 54.3028 22.3139 56 28 56H167C182.464 56 195 43.464 195 28C195 22.3139 193.303 17.0251 190.391 12.6084Z"
+        fill="var(--button-shadow-color)"
+    />
+</svg>
+<svg
+    class="button__shadow button__shadow--hover"
+    xmlns="http://www.w3.org/2000/svg"
+    width="191.871"
+    height="52.8701"
+    viewBox="0 0 191.871 52.8701"
+    fill="none"
+    aria-hidden="true"
+    focusable="false"
+>
+    <path
+        d="M176.743 0C185.73 4.66065 191.871 14.0475 191.871 24.8701C191.871 40.3341 179.335 52.8701 163.871 52.8701H24.8711C14.0483 52.87 4.66058 46.7293 0 37.7422C3.85367 39.7406 8.23033 40.8701 12.8711 40.8701H151.871C167.335 40.8701 179.871 28.3341 179.871 12.8701C179.871 8.22966 178.741 3.85349 176.743 0Z"
+        fill="var(--button-shadow-color)"
+    />
+</svg>
+<svg
+    class="button__shadow button__shadow--active"
+    xmlns="http://www.w3.org/2000/svg"
+    width="195"
+    height="56"
+    viewBox="0 0 195 56"
+    fill="none"
+    aria-hidden="true"
+    focusable="false"
+>
+    <path
+        d="M167 0C182.464 0 195 12.536 195 28C195 28.8836 194.956 29.7574 194.876 30.6201C193.686 19.0351 183.898 9.99805 171.998 9.99805H33.998C21.2958 9.99824 10.9982 20.2958 10.998 32.998C10.998 45.7005 21.2957 55.9978 33.998 55.998H167.16C167.107 55.9983 167.053 56 167 56H28C12.536 56 0 43.464 0 28C0 12.536 12.536 6.6842e-07 28 0H167Z"
+        fill="var(--button-shadow-color)"
+    />
+</svg>

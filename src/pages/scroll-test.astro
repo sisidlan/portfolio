@@ -1,0 +1,105 @@
+---
+import BinderLayout from '../layouts/BinderLayout.astro';
+---
+
+<BinderLayout
+    title="Scroll test | Kevin"
+    description="A manual test for the scrolling paper and stationary binder navigation."
+    noindex
+>
+    <article class="scroll-test">
+        <section class="checkpoint" aria-labelledby="test-start">
+            <p class="checkpoint-label">01 / Top of the paper</p>
+            <h1 id="test-start">Scroll test</h1>
+            <p>
+                This page has three screens of content and uses the same binder layout as the
+                portfolio.
+            </p>
+            <ol>
+                <li>Place your pointer over the paper and scroll down slowly.</li>
+                <li>Watch a horizontal grid line: it should move with the text.</li>
+                <li>The dark navigation bar and its rounded corner should stay in place.</li>
+            </ol>
+            <p>
+                To test the top edge, scroll upward here and release. Any elastic bounce should stay
+                inside the paper area.
+            </p>
+            <p>
+                Use a trackpad or touch screen to check the bounce; its appearance depends on your
+                browser and device.
+            </p>
+        </section>
+
+        <section class="checkpoint" aria-labelledby="test-middle">
+            <p class="checkpoint-label">02 / Middle of the paper</p>
+            <h3 id="test-middle">Keep scrolling</h3>
+            <p>The heading and grid should travel together beneath the navigation.</p>
+            <p>The red margin line should continue for the full length of the paper.</p>
+            <p>
+                Try reversing direction halfway through a scroll. The navigation should remain in
+                the same place.
+            </p>
+        </section>
+
+        <section class="checkpoint checkpoint-end" aria-labelledby="test-end">
+            <p class="checkpoint-label">03 / Bottom of the paper</p>
+            <h3 id="test-end">Scroll a little further, then release</h3>
+            <p>
+                You have reached the end. Keep scrolling downward briefly, then lift your fingers.
+            </p>
+            <ul>
+                <li>The navigation should stay still throughout the gesture.</li>
+                <li>On devices with elastic scrolling, the paper should bounce and settle.</li>
+                <li>Watch for an exposed blank strip or a frozen grid during the bounce.</li>
+            </ul>
+            <p>
+                Scroll back to the top to test the other edge, or <a href="/">return home</a>.
+            </p>
+            <p class="end-marker">End of test content</p>
+        </section>
+    </article>
+</BinderLayout>
+
+<style>
+    /* ======================================================================
+       Diagnostic page layout
+       ====================================================================== */
+    .scroll-test {
+        color: var(--black-ink-color);
+        font-family: system-ui, sans-serif;
+        line-height: var(--scroll-test-line-height);
+    }
+
+    .checkpoint {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-height: var(--scroll-test-checkpoint-min-height);
+        padding: var(--scroll-test-checkpoint-padding-block)
+            clamp(
+                var(--scroll-test-checkpoint-padding-inline-min),
+                var(--scroll-test-checkpoint-padding-inline-fluid),
+                var(--scroll-test-checkpoint-padding-inline-max)
+            );
+    }
+
+    .checkpoint > * {
+        max-width: var(--scroll-test-content-max-width);
+    }
+
+    .checkpoint-label,
+    .end-marker {
+        font-weight: 700;
+    }
+
+    .checkpoint-end {
+        justify-content: flex-end;
+    }
+
+    .end-marker {
+        align-self: stretch;
+        margin-bottom: 0;
+        border-top: var(--scroll-test-marker-width) solid var(--margin-color);
+        padding-top: var(--scroll-test-end-marker-padding-top);
+    }
+</style>

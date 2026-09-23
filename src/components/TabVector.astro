@@ -1,0 +1,176 @@
+---
+interface Props {
+    kind: 'home' | 'close' | 'work' | 'about';
+}
+
+const { kind } = Astro.props;
+
+// ============================================================================
+// SVG geometry and palette references
+// ============================================================================
+const isWide = kind === 'work' || kind === 'about';
+const width = isWide ? 272 : 144;
+const shapeId = `${kind}-tab-shape`;
+const clipId = `${kind}-tab-clip`;
+const outlineId = `${kind}-${isWide ? 'active-' : ''}tab-outline`;
+const overlapId = `${kind}-overlap-shadow`;
+
+// Coordinates include the sloping tab shoulders; CSS controls the rem dimensions.
+const shape = isWide
+    ? 'M34.4385 0H237.562C247.982 0.000092 257.1 7.124695 259.785 17.363593L272 60H0L12.2148 17.363593C14.8997 7.124695 24.0184 0.000092 34.4385 0Z'
+    : 'M34.4385 0H109.562C119.982 0.000092 129.1 7.124695 131.785 17.363593L144 60H0L12.2148 17.363593C14.8578 7.284631 23.7351 0.223169 33.9512 0.004963L34.4385 0Z';
+
+// Each palette: SVG ID prefix, bottom shade, face color, top outline color.
+type Palette = [string, string, string, string];
+const gray: Palette = [
+    isWide ? `${kind}-gray` : 'gray',
+    'var(--tab-gray-shade)',
+    'var(--tab-gray-face)',
+    'var(--tab-gray-outline)',
+];
+const palettes: Record<Props['kind'], Palette[]> = {
+    home: [
+        gray,
+        [
+            'green',
+            'var(--tab-home-hover-shade)',
+            'var(--tab-home-hover-face)',
+            'var(--tab-home-hover-outline)',
+        ],
+        [
+            'dark-green',
+            'var(--tab-home-active-shade)',
+            'var(--tab-home-active-face)',
+            'var(--tab-home-active-outline)',
+        ],
+    ],
+    close: [],
+    work: [
+        gray,
+        [
+            'work-blue',
+            'var(--tab-work-hover-shade)',
+            'var(--tab-work-hover-face)',
+            'var(--tab-work-hover-outline)',
+        ],
+        [
+            'work-dark-blue',
+            'var(--tab-work-active-shade)',
+            'var(--tab-work-active-face)',
+            'var(--tab-work-active-outline)',
+        ],
+    ],
+    about: [
+        gray,
+        [
+            'about-pink',
+            'var(--tab-about-hover-shade)',
+            'var(--tab-about-hover-face)',
+            'var(--tab-about-hover-outline)',
+        ],
+        [
+            'about-dark-pink',
+            'var(--tab-about-active-shade)',
+            'var(--tab-about-active-face)',
+            'var(--tab-about-active-outline)',
+        ],
+    ],
+};
+---
+
+<svg
+    class:list={['vector-tab', `vector-tab-${kind}`]}
+    xmlns="http://www.w3.org/2000/svg"
+    width={width}
+    height="60"
+    viewBox={`0 0 ${width} 60`}
+    fill="none"
+    aria-hidden="true"
+    focusable="false"
+>
+    <defs>
+        <path id={shapeId} d={shape} />
+        <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+            <use href={`#${shapeId}`} />
+        </clipPath>
+        <linearGradient
+            id={outlineId}
+            x1={width / 2}
+            y1="60"
+            x2={width / 2}
+            y2="0"
+            gradientUnits="userSpaceOnUse"
+        >
+            <stop offset="0%" stop-color="var(--paper-color)" />
+            <stop offset="100%" stop-color="var(--active-tab-highlight-color)" />
+        </linearGradient>
+        {palettes[kind].map(([prefix, shade, face, outline]) => (
+            <>
+                <linearGradient
+                    id={`${prefix}-tab-fill`}
+                    x1={width / 2}
+                    y1="60"
+                    x2={width / 2}
+                    y2="0"
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <stop offset="0%" stop-color={shade} />
+                    <stop offset="6%" stop-color={face} />
+                    <stop offset="100%" stop-color={face} />
+                </linearGradient>
+                <linearGradient
+                    id={`${prefix}-tab-outline`}
+                    x1={width / 2}
+                    y1="60"
+                    x2={width / 2}
+                    y2="0"
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <stop offset="0%" stop-color={shade} />
+                    <stop offset="100%" stop-color={outline} />
+                </linearGradient>
+            </>
+        ))}
+        {isWide && (
+            <linearGradient
+                id={overlapId}
+                x1={kind === 'work' ? 272 : 0}
+                y1="60"
+                x2={kind === 'work' ? 10.519 : 261.481}
+                y2="-14.912"
+                gradientUnits="userSpaceOnUse"
+            >
+                <stop offset="0%" stop-color="var(--tab-overlap-shadow-color)" />
+                <stop offset="4%" stop-color="var(--tab-overlap-shadow-color)" />
+                <stop offset="8%" stop-color="var(--tab-overlap-shadow-color)" stop-opacity="0" />
+                <stop offset="100%" stop-color="var(--tab-overlap-shadow-color)" stop-opacity="0" />
+            </linearGradient>
+        )}
+    </defs>
+    {isWide ? (
+        <>
+            <use href={`#${shapeId}`} fill="var(--tab-fill)" />
+            <use
+                class="tab-overlap-shadow"
+                href={`#${shapeId}`}
+                fill={`url(#${overlapId})`}
+                clip-path={`url(#${clipId})`}
+            />
+            <use
+                href={`#${shapeId}`}
+                fill="none"
+                stroke="var(--tab-outline)"
+                stroke-width="4"
+                clip-path={`url(#${clipId})`}
+            />
+        </>
+    ) : (
+        <use
+            href={`#${shapeId}`}
+            fill="var(--tab-fill)"
+            stroke="var(--tab-outline)"
+            stroke-width="4"
+            clip-path={`url(#${clipId})`}
+        />
+    )}
+</svg>

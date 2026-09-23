@@ -1,0 +1,157 @@
+@import './tokens.css';
+@import './typography.css';
+@import './buttons.css';
+
+/* ==========================================================================
+   Reset and shared page foundations
+   ========================================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+html {
+    font-size: var(--root-font-size);
+}
+
+body {
+    margin: 0;
+}
+
+img,
+video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.page-content {
+    max-width: var(--page-max-width);
+    margin: var(--page-content-top-gap) auto 0;
+    padding: 0 var(--page-gutter);
+}
+
+/* ==========================================================================
+   Keyboard focus and skip navigation
+   ========================================================================== */
+a:focus,
+button:focus {
+    outline: var(--focus-outline-width) solid var(--indigo-ink-color);
+    outline-offset: var(--focus-outline-offset);
+}
+
+@supports selector(:focus-visible) {
+    a:focus,
+    button:focus {
+        outline: none;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+        outline: var(--focus-outline-width) solid var(--indigo-ink-color);
+        outline-offset: var(--focus-outline-offset);
+    }
+}
+
+.skip-link {
+    position: fixed;
+    top: var(--skip-link-offset);
+    left: var(--skip-link-offset);
+    z-index: 100;
+    padding: var(--skip-link-padding-block) var(--skip-link-padding-inline);
+    background: var(--paper-color);
+    color: var(--black-ink-color);
+    font-family: var(--font-body);
+    transform: translateY(calc(-100% - var(--skip-link-hide-gap)));
+}
+
+.skip-link:focus {
+    transform: none;
+}
+
+/* ============================================================================
+   Page-entry motion
+   ============================================================================ */
+@keyframes page-entry-reveal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.page[data-page-kind='work'] .work-browser__content,
+.page[data-page-kind='work'] .work-view-toggle,
+.page[data-page-kind='case-study'] .page-content > :not(h1),
+.page[data-page-kind='about'] .page-content > :not(h1),
+.page[data-page-kind='other'] .page-content > :not(h1),
+.page[data-page-kind] + .contact-section,
+.page[data-page-kind] ~ .site-footer {
+    animation: page-entry-reveal var(--motion-page-entry-duration) var(--motion-page-entry-ease)
+        var(--motion-page-entry-delay) backwards;
+    will-change: opacity;
+}
+
+/* Prepare the opacity layer during the delay, including transformed descendants.
+   Release it after the reveal rather than retaining large page-sized layers. */
+[data-page-entry-complete] {
+    will-change: auto !important;
+}
+
+/* Hold swapped content at its opening keyframe until Astro has initialized the new page. */
+:root[data-page-entry-pending='true']
+    :is(
+        .page[data-page-kind='home'] .home-intro > p,
+        .page[data-page-kind='home'] .home-intro > .button-primary,
+        .page[data-page-kind='home'] .sticky-notes-home,
+        .page[data-page-kind='home'] .home-body,
+        .page[data-page-kind='work'] .work-browser__content,
+        .page[data-page-kind='work'] .work-view-toggle,
+        .page[data-page-kind='case-study'] .page-content > :not(h1),
+        .page[data-page-kind='about'] .page-content > :not(h1),
+        .page[data-page-kind='other'] .page-content > :not(h1),
+        .page[data-page-kind] + .contact-section,
+        .page[data-page-kind] ~ .site-footer
+    ) {
+    opacity: 0;
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Keep future motion additions accessible even when a component has no local override. */
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0s !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+        will-change: auto !important;
+    }
+
+    .page[data-page-kind] .work-browser__content,
+    .page[data-page-kind] .work-view-toggle,
+    .page[data-page-kind] .page-content > :not(h1),
+    .page[data-page-kind] + .contact-section,
+    .page[data-page-kind] ~ .site-footer {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

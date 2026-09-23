@@ -1,0 +1,21 @@
+---
+// ============================================================================
+// Grid-aligned binder ring decoration
+// ============================================================================
+import { binderRingLayout } from '../config/binder';
+
+const { startRow, spacingRows, bottomClearanceRows } = binderRingLayout;
+---
+
+<div
+    class="binder-rings"
+    data-binder-rings
+    data-start-row={startRow}
+    data-spacing-rows={spacingRows}
+    data-bottom-clearance-rows={bottomClearanceRows}
+    aria-hidden="true"
+></div>
+
+<script>
+    import '../scripts/binder-rings';
+</script>

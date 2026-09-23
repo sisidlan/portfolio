@@ -1,0 +1,449 @@
+/* ==========================================================================
+   Binder shell and ring decoration
+   ========================================================================== */
+.binder {
+    position: relative;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.binder-rings {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--binder-ring-left);
+    width: var(--binder-ring-artwork-width);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.binder-ring {
+    position: absolute;
+    top: calc(var(--binder-ring-row) * var(--grid-size) - var(--binder-ring-paper-anchor-y));
+    left: 0;
+    width: var(--binder-ring-artwork-width);
+    height: var(--binder-ring-artwork-height);
+    background-image: url('/images/ring.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.binder-rings:not([data-bounds-ready]) .binder-ring,
+.binder-ring[data-out-of-bounds] {
+    visibility: hidden;
+}
+
+/* ==========================================================================
+   Navigation structure
+   ========================================================================== */
+.binder-nav {
+    display: flex;
+    flex-shrink: 0;
+    height: var(--binder-nav-height);
+    background-color: var(--black-ink-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.binder-nav__content {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: var(--page-max-width);
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 var(--nav-gutter);
+}
+
+.nav-tabs {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0;
+    margin-inline-start: auto;
+}
+
+.nav-tabs .tab-work {
+    z-index: 2;
+}
+
+.nav-tabs .tab-about {
+    z-index: 1;
+}
+
+.nav-tabs--about-front .tab-work {
+    z-index: 1;
+}
+
+.nav-tabs--about-front .tab-about {
+    z-index: 2;
+}
+
+.binder-nav__corner {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: var(--paper-corner-radius);
+    height: var(--paper-corner-radius);
+    fill: var(--black-ink-color);
+    display: block;
+    pointer-events: none;
+}
+
+.tab {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    height: var(--binder-nav-height);
+    overflow: visible;
+}
+
+.tab-home,
+.tab-close {
+    flex: 0 0 var(--compact-tab-width);
+    width: var(--compact-tab-width);
+}
+
+.tab-home {
+    --tab-fill: var(--gray-tab-color);
+    --tab-outline: var(--gray-tab-outline-color);
+}
+
+.tab-home[aria-current='page'] {
+    --tab-fill: var(--paper-color);
+    --tab-outline: url(#home-tab-outline);
+}
+
+.tab-home:not([aria-current='page']):hover {
+    --tab-fill: var(--green-tab-color);
+    --tab-outline: var(--green-tab-outline-color);
+}
+
+.tab-home:not([aria-current='page']):active {
+    --tab-fill: var(--dark-green-tab-color);
+    --tab-outline: var(--dark-green-tab-outline-color);
+}
+
+.tab-close {
+    --tab-fill: var(--paper-color);
+    --tab-outline: url(#close-tab-outline);
+    position: absolute;
+    top: 0;
+    left: var(--tab-close-offset);
+    z-index: 3;
+    cursor: pointer;
+}
+
+.tab-close-stage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: calc(var(--tab-close-offset) + var(--tab-home-vector-width));
+    height: var(--binder-nav-height);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.tab-close-stage .tab-close {
+    pointer-events: auto;
+}
+
+.tab-close-exit-stage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: calc(var(--tab-close-offset) + var(--tab-home-vector-width));
+    height: var(--binder-nav-height);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.tab-close-stage[data-close-focus] {
+    overflow: visible;
+}
+
+@supports selector(:has(*)) {
+    .tab-close-stage:has(.tab-close:focus-visible) {
+        overflow: visible;
+    }
+}
+
+.tab-work,
+.tab-about {
+    flex: 0 0 var(--wide-tab-width);
+    width: var(--wide-tab-width);
+}
+
+/* ==========================================================================
+   Tab color states
+   ========================================================================== */
+.tab-work {
+    --gray-tab-color: url(#work-gray-tab-fill);
+    --gray-tab-outline-color: url(#work-gray-tab-outline);
+    --tab-fill: var(--gray-tab-color);
+    --tab-outline: var(--gray-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-gray-color);
+}
+
+.tab-about {
+    --gray-tab-color: url(#about-gray-tab-fill);
+    --gray-tab-outline-color: url(#about-gray-tab-outline);
+    --tab-fill: var(--gray-tab-color);
+    --tab-outline: var(--gray-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-gray-color);
+}
+
+.tab-work[aria-current='page'] {
+    --tab-fill: var(--paper-color);
+    --tab-outline: url(#work-active-tab-outline);
+}
+
+.tab-about[aria-current='page'] {
+    --tab-fill: var(--paper-color);
+    --tab-outline: url(#about-active-tab-outline);
+}
+
+.tab-work:not([aria-current='page']):hover {
+    --tab-fill: var(--blue-tab-color);
+    --tab-outline: var(--blue-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-work-hover-color);
+}
+
+.tab-work:not([aria-current='page']):active {
+    --tab-fill: var(--dark-blue-tab-color);
+    --tab-outline: var(--dark-blue-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-work-active-color);
+}
+
+.tab-about:not([aria-current='page']):hover {
+    --tab-fill: var(--pink-tab-color);
+    --tab-outline: var(--pink-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-about-hover-color);
+}
+
+.tab-about:not([aria-current='page']):active {
+    --tab-fill: var(--dark-pink-tab-color);
+    --tab-outline: var(--dark-pink-tab-outline-color);
+    --tab-overlap-shadow-color: var(--tab-overlap-about-active-color);
+}
+
+/* ==========================================================================
+   Tab vectors, labels, and icons
+   ========================================================================== */
+.vector-tab {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: 0;
+}
+
+.vector-tab-home,
+.vector-tab-close {
+    width: var(--tab-home-vector-width);
+    height: var(--tab-vector-height);
+}
+
+.vector-tab-work,
+.vector-tab-about {
+    width: var(--tab-wide-vector-width);
+    height: var(--tab-vector-height);
+}
+
+.tab-overlap-shadow {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.nav-tabs--about-front .tab-work .tab-overlap-shadow,
+.nav-tabs:not(.nav-tabs--about-front) .tab-about .tab-overlap-shadow {
+    opacity: 1;
+}
+
+.icon-home,
+.icon-close {
+    position: absolute;
+    left: 50%;
+    top: auto;
+    bottom: calc(var(--tab-vector-height) / 2);
+    transform: translate(-50%, 50%);
+    z-index: 1;
+}
+
+.icon-home {
+    width: var(--home-icon-width);
+    height: var(--home-icon-height);
+}
+
+.icon-close {
+    width: var(--close-icon-size);
+    height: var(--close-icon-size);
+}
+
+.tab-close-stage > .icon-close {
+    left: calc(var(--tab-close-offset) + var(--compact-tab-width) / 2);
+    z-index: 4;
+    pointer-events: none;
+}
+
+/* ============================================================================
+   Case-study tab motion
+   ============================================================================ */
+@keyframes case-study-tab-entry {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes case-study-close-icon-entry {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 50%) rotate(var(--motion-case-study-icon-rotation));
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 50%) rotate(0deg);
+    }
+}
+
+@keyframes case-study-tab-exit {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+body[data-page-kind='case-study'] .tab-close {
+    animation: case-study-tab-entry var(--motion-case-study-tab-duration)
+        var(--motion-page-entry-ease) both;
+}
+
+body[data-page-kind='case-study'] .tab-close-stage > .icon-close {
+    animation: case-study-close-icon-entry var(--motion-page-entry-duration)
+        var(--motion-page-entry-ease) var(--motion-case-study-icon-delay) both;
+}
+
+.tab-close-exit-stage[data-close-exiting] .tab-close {
+    pointer-events: none;
+    animation: case-study-tab-exit var(--motion-case-study-tab-duration)
+        var(--motion-page-entry-ease) both;
+}
+
+.tab-close-exit-stage[data-close-exiting] > .icon-close {
+    opacity: 0;
+    animation: none;
+}
+
+.tab-work > .tab__label,
+.tab-about > .tab__label {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--tab-vector-height);
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   Paper scroll surface and footer edge
+   ========================================================================== */
+.paper {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+    background-color: var(--paper-color);
+    background-image:
+        linear-gradient(var(--margin-color), var(--margin-color)),
+        repeating-linear-gradient(
+            90deg,
+            var(--grid-color) 0 var(--grid-line),
+            transparent var(--grid-line) var(--grid-size)
+        );
+    background-size:
+        var(--margin-width) 100%,
+        100% 100%;
+    background-position:
+        calc(var(--margin-column) * var(--grid-size) - (var(--margin-width) - var(--grid-line)) / 2)
+            0,
+        0 0;
+    background-repeat: no-repeat;
+}
+
+.paper--near-bottom {
+    background-color: var(--black-ink-color);
+    background-image: none;
+}
+
+.reader {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    background-color: var(--paper-color);
+    background-image:
+        linear-gradient(var(--margin-color), var(--margin-color)),
+        linear-gradient(90deg, var(--grid-color) var(--grid-line), transparent var(--grid-line)),
+        linear-gradient(180deg, var(--grid-color) var(--grid-line), transparent var(--grid-line));
+    background-size:
+        var(--margin-width) 100%,
+        var(--grid-size) var(--grid-size),
+        var(--grid-size) var(--grid-size);
+    background-position:
+        calc(var(--margin-column) * var(--grid-size) - (var(--margin-width) - var(--grid-line)) / 2)
+            0,
+        0 0,
+        0 0;
+    background-repeat: repeat-y, repeat, repeat;
+}
+
+.paper-sheet {
+    position: relative;
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    padding-bottom: var(--page-footer-gap);
+}
+
+.page {
+    flex: 1 0 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .paper {
+        scroll-behavior: auto;
+    }
+
+    body[data-page-kind='case-study'] .tab-close,
+    body[data-page-kind='case-study'] .tab-close-stage > .icon-close,
+    .tab-close-exit-stage[data-close-exiting] .tab-close,
+    .tab-close-exit-stage[data-close-exiting] > .icon-close {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .tab-close-exit-stage[data-close-exiting] > .icon-close {
+        opacity: 0;
+    }
+}

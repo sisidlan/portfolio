@@ -1,0 +1,83 @@
+---
+// ============================================================================
+// Route-aware navigation state
+// ============================================================================
+import TabVector from './TabVector.astro';
+
+const path = Astro.url.pathname;
+const isWorkSection = path === '/work' || path.startsWith('/work/');
+const isWorkPage = path === '/work' || path === '/work/';
+const isCaseStudy = isWorkSection && !isWorkPage;
+---
+
+<nav class="binder-nav" aria-label="Main navigation">
+    <div class="binder-nav__content">
+        <a
+            class="tab tab-home"
+            href="/"
+            aria-label="Home"
+            aria-current={path === '/' ? 'page' : undefined}
+        >
+            <TabVector kind="home" />
+            <svg
+                class="icon-home"
+                xmlns="http://www.w3.org/2000/svg"
+                width="27"
+                height="24"
+                viewBox="0 0 27 24"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+            >
+                <path
+                    d="M13.3333 0C13.3333 0 5.08533 7.12 0.476 10.976C0.329265 11.1037 0.211051 11.2609 0.129043 11.4374C0.0470354 11.6138 0.00306841 11.8055 0 12C0 12.3536 0.140476 12.6928 0.390524 12.9428C0.640573 13.1929 0.979711 13.3333 1.33333 13.3333H4V22.6667C4 23.0203 4.14048 23.3594 4.39052 23.6095C4.64057 23.8595 4.97971 24 5.33333 24H9.33333C9.68696 24 10.0261 23.8595 10.2761 23.6095C10.5262 23.3594 10.6667 23.0203 10.6667 22.6667V17.3333H16V22.6667C16 23.0203 16.1405 23.3594 16.3905 23.6095C16.6406 23.8595 16.9797 24 17.3333 24H21.3333C21.687 24 22.0261 23.8595 22.2761 23.6095C22.5262 23.3594 22.6667 23.0203 22.6667 22.6667V13.3333H25.3333C25.687 13.3333 26.0261 13.1929 26.2761 12.9428C26.5262 12.6928 26.6667 12.3536 26.6667 12C26.6648 11.8018 26.6179 11.6065 26.5294 11.4291C26.4409 11.2517 26.3132 11.0968 26.156 10.976C21.5787 7.12 13.3333 0 13.3333 0Z"
+                    fill="var(--black-ink-color)"
+                />
+            </svg>
+        </a>
+        {isCaseStudy && (
+            <div class="tab-close-stage">
+                <a
+                    class="tab tab-close"
+                    href="/work/"
+                    aria-label="Close case study and return to Work"
+                    data-case-study-close
+                >
+                    <TabVector kind="close" />
+                </a>
+                <svg
+                    class="icon-close"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="19"
+                    height="19"
+                    viewBox="0 0 19 19"
+                    fill="none"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <path
+                        d="M15.8495 0.292847C16.24 -0.0975336 16.8731 -0.0976296 17.2635 0.292847L18.6776 1.70691C19.0681 2.09739 19.068 2.73044 18.6776 3.12097L12.3134 9.48523L18.6776 15.8495C19.068 16.24 19.0681 16.8731 18.6776 17.2635L17.2635 18.6776C16.8731 19.0681 16.24 19.068 15.8495 18.6776L9.48523 12.3134L3.12097 18.6776C2.73044 19.068 2.09738 19.0681 1.70691 18.6776L0.292847 17.2635C-0.0976277 16.8731 -0.097528 16.24 0.292847 15.8495L6.6571 9.48523L0.292847 3.12097C-0.0975675 2.73044 -0.0976409 2.0974 0.292847 1.70691L1.70691 0.292847C2.0974 -0.097641 2.73044 -0.0975678 3.12097 0.292847L9.48523 6.6571L15.8495 0.292847Z"
+                        fill="var(--black-ink-color)"
+                    />
+                </svg>
+            </div>
+        )}
+        <div class:list={['nav-tabs', { 'nav-tabs--about-front': path === '/about/' }]}>
+            <a class="tab tab-work" href="/work/" aria-current={isWorkPage ? 'page' : undefined}>
+                <TabVector kind="work" />
+                <span class="tab__label">Work</span>
+            </a>
+            <a
+                class="tab tab-about"
+                href="/about/"
+                aria-current={path === '/about/' ? 'page' : undefined}
+            >
+                <TabVector kind="about" />
+                <span class="tab__label">About</span>
+            </a>
+        </div>
+    </div>
+    <svg class="binder-nav__corner" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M0 0H24V24A24 24 0 0 0 0 0Z" />
+    </svg>
+</nav>

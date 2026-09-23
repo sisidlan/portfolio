@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Home-page composition
+   ========================================================================== */
+.page-content-home {
+    margin: 0 auto;
+}
+
+.home-hero {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.home-intro {
+    margin-top: var(--home-intro-top-gap);
+}
+
+.home-intro .button-primary {
+    margin-top: var(--home-intro-button-gap);
+}
+
+.sticky-notes-home {
+    position: relative;
+    width: var(--home-notes-width);
+    height: var(--home-notes-height);
+    margin-top: var(--home-notes-top-gap);
+}
+
+.sticky-notes-home > .sticky-note.sticky-home-1,
+.sticky-notes-home > .sticky-note.sticky-home-2 {
+    position: absolute;
+}
+
+.sticky-home-1 {
+    top: var(--home-note-one-top);
+    left: var(--home-note-one-left);
+    z-index: 2;
+}
+
+.sticky-home-2 {
+    right: var(--home-note-two-right);
+    bottom: 0;
+    z-index: 1;
+}
+
+.sticky-home-2__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--home-note-footer-gap);
+    margin-top: auto;
+}
+
+.home-body {
+    margin-top: var(--home-body-top-gap);
+}
+
+/* ==========================================================================
+   Home-page entry sequence
+   ========================================================================== */
+.page[data-page-kind='home'] .home-intro > p,
+.page[data-page-kind='home'] .home-intro > .button-primary,
+.page[data-page-kind='home'] .sticky-notes-home,
+.page[data-page-kind='home'] .home-body {
+    animation: page-entry-reveal var(--motion-page-entry-duration) var(--motion-page-entry-ease)
+        var(--motion-page-entry-delay) backwards;
+    will-change: opacity;
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > h1,
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > p,
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > .button-primary,
+:root[data-home-entry='first'] .page[data-page-kind='home'] .sticky-notes-home,
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-body {
+    animation-name: page-entry-reveal;
+    animation-duration: var(--motion-home-entry-duration);
+    animation-timing-function: var(--motion-page-entry-ease);
+    animation-fill-mode: backwards;
+    will-change: opacity;
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > h1 {
+    animation-delay: var(--motion-home-entry-start-delay);
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > p:nth-of-type(1),
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > p:nth-of-type(2) {
+    animation-delay: var(--motion-home-entry-copy-delay);
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-intro > .button-primary {
+    animation-delay: var(--motion-home-entry-action-delay);
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .sticky-notes-home {
+    animation-delay: var(--motion-home-entry-notes-delay);
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] .home-body {
+    animation-delay: var(--motion-home-entry-body-delay);
+}
+
+:root[data-home-entry='first'] .page[data-page-kind='home'] + .contact-section {
+    animation-delay: var(--motion-home-entry-contact-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page[data-page-kind='home'] .home-intro > h1,
+    .page[data-page-kind='home'] .home-intro > p,
+    .page[data-page-kind='home'] .home-intro > .button-primary,
+    .page[data-page-kind='home'] .sticky-notes-home,
+    .page[data-page-kind='home'] .home-body,
+    :root[data-home-entry] .page[data-page-kind='home'] .home-intro > h1,
+    :root[data-home-entry] .page[data-page-kind='home'] .home-intro > p,
+    :root[data-home-entry] .page[data-page-kind='home'] .home-intro > .button-primary,
+    :root[data-home-entry] .page[data-page-kind='home'] .sticky-notes-home,
+    :root[data-home-entry] .page[data-page-kind='home'] .home-body {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+    .page[data-page-kind='home'] + .contact-section,
+    :root[data-home-entry] .page[data-page-kind='home'] + .contact-section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

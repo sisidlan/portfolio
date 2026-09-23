@@ -1,0 +1,498 @@
+---
+// ============================================================================
+// Contact form dependencies
+// ============================================================================
+import NetherlandsTime from './NetherlandsTime.astro';
+import PrimarySubmit from './PrimarySubmit.astro';
+---
+
+<section id="contact" class="contact-section" aria-labelledby="contact-heading">
+    <div class="contact-section__content">
+        <form
+            class="contact-form"
+            data-contact-form
+            data-astro-reload
+            method="post"
+            accept-charset="UTF-8"
+        >
+            <div class="contact-form__start">
+                <h3 class="contact-section__heading" id="contact-heading">
+                    Contact me
+                </h3>
+
+                <div class="contact-form__fields">
+                    <div class="contact-form__field contact-form__field--name" data-contact-field>
+                        <label class="contact-form__label" for="contact-name">
+                            <b>Name</b>
+                        </label>
+                        <input
+                            class="contact-form__control"
+                            id="contact-name"
+                            name="name"
+                            type="text"
+                            autocomplete="name"
+                            placeholder=" "
+                            aria-describedby="contact-name-error"
+                            required
+                        />
+                        <p
+                            class="contact-form__error"
+                            id="contact-name-error"
+                            data-contact-error
+                            aria-live="polite"
+                            aria-hidden="true"
+                        ></p>
+                    </div>
+
+                    <div class="contact-form__field contact-form__field--email" data-contact-field>
+                        <label class="contact-form__label" for="contact-email">
+                            <b>Email</b>
+                        </label>
+                        <input
+                            class="contact-form__control"
+                            id="contact-email"
+                            name="email"
+                            type="email"
+                            autocomplete="email"
+                            placeholder=" "
+                            aria-describedby="contact-email-error"
+                            required
+                        />
+                        <p
+                            class="contact-form__error"
+                            id="contact-email-error"
+                            data-contact-error
+                            aria-live="polite"
+                            aria-hidden="true"
+                        ></p>
+                    </div>
+
+                    <div
+                        class="contact-form__field contact-form__field--message"
+                        data-contact-field
+                    >
+                        <label class="contact-form__label" for="contact-message">
+                            <b>Message</b>
+                        </label>
+                        <textarea
+                            class="contact-form__control"
+                            id="contact-message"
+                            name="message"
+                            rows="2"
+                            placeholder=" "
+                            aria-describedby="contact-message-error"
+                            required
+                        ></textarea>
+                        <p
+                            class="contact-form__error"
+                            id="contact-message-error"
+                            data-contact-error
+                            aria-live="polite"
+                            aria-hidden="true"
+                        ></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form__end">
+                <aside class="contact-section__details" aria-label="Location and local time">
+                    <div class="contact-section__detail">
+                        <h4>My location</h4>
+                        <p class="contact-section__value">Breda, The Netherlands</p>
+                    </div>
+                    <div class="contact-section__detail">
+                        <h4>Local time</h4>
+                        <div class="contact-section__value">
+                            <NetherlandsTime showLocation={false} class="contact-section__time" />
+                        </div>
+                    </div>
+                </aside>
+
+                <PrimarySubmit class="contact-form__submit" data-contact-submit>
+                    Send
+                </PrimarySubmit>
+                <p
+                    class="contact-form__submit-hint"
+                    id="contact-submit-hint"
+                    data-contact-submit-hint
+                    aria-hidden="true"
+                >
+                    Complete all fields to enable send
+                </p>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    /* ======================================================================
+       Contact section and responsive form layout
+       ====================================================================== */
+    .contact-section {
+        flex-shrink: 0;
+        margin-top: var(--contact-section-top-gap);
+    }
+
+    .contact-section__content {
+        position: relative;
+        --contact-grid-offset: 0rem;
+        --contact-form-grid-adjustment: 0px;
+    }
+
+    .contact-section__content::before {
+        content: '';
+        position: absolute;
+        top: calc(-1 * var(--contact-divider-offset) + var(--contact-divider-grid-adjustment));
+        right: max(
+            calc(var(--page-gutter) - var(--content-divider-extension)),
+            calc(
+                (100% - var(--page-max-width)) / 2 + var(--page-gutter) -
+                    var(--content-divider-extension)
+            )
+        );
+        left: max(
+            calc(var(--page-gutter) - var(--content-divider-extension)),
+            calc(
+                (100% - var(--page-max-width)) / 2 + var(--page-gutter) -
+                    var(--content-divider-extension)
+            )
+        );
+        height: var(--content-divider-thickness);
+        border-radius: var(--content-divider-radius);
+        background-color: var(--content-divider-color);
+        pointer-events: none;
+    }
+
+    .contact-section__content {
+        width: 100%;
+        max-width: var(--page-max-width);
+        margin: 0 auto;
+        padding-inline: var(--page-gutter);
+        padding-bottom: var(--contact-grid-offset);
+    }
+
+    .contact-form {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--grid-size);
+        width: 100%;
+        margin-top: 0;
+        /* The shared offset preserves the section's established height. The
+           second adjustment moves the form itself onto the next paper line
+           when page-specific content changes its natural starting position. */
+        top: calc(var(--contact-grid-offset) + var(--contact-form-grid-adjustment));
+        align-items: stretch;
+    }
+
+    .contact-form__start,
+    .contact-form__end {
+        min-width: 0;
+        min-height: var(--contact-form-min-height);
+    }
+
+    .contact-section__heading {
+        height: var(--grid-size);
+        margin-bottom: var(--grid-size);
+        color: var(--black-ink-color);
+        line-height: var(--grid-size);
+    }
+
+    .contact-form__fields {
+        display: grid;
+        row-gap: var(--grid-size);
+    }
+
+    .contact-form__field {
+        position: relative;
+        min-width: 0;
+        height: var(--grid-size);
+        color: var(--light-gray-ink-color);
+    }
+
+    .contact-form__field--message {
+        height: calc(2 * var(--grid-size));
+    }
+
+    .contact-form__field::before {
+        content: '';
+        position: absolute;
+        inset: var(--contact-field-stroke-top) 0 calc(-1 * var(--grid-line));
+        z-index: 0;
+        border-bottom: var(--grid-line) solid currentColor;
+        border-left: var(--grid-line) solid currentColor;
+        border-bottom-left-radius: var(--contact-field-corner-radius);
+        pointer-events: none;
+        transition: color 160ms ease;
+    }
+
+    .contact-form__label {
+        position: absolute;
+        top: 0;
+        left: var(--contact-field-label-offset);
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        height: var(--grid-size);
+        color: var(--light-gray-ink-color);
+        font-family: var(--font-body);
+        font-size: var(--body-size);
+        font-weight: 500;
+        line-height: 100%;
+        letter-spacing: var(--caption-letter-spacing);
+        pointer-events: none;
+        transition:
+            color 160ms ease,
+            font-size 160ms ease,
+            top 160ms ease;
+    }
+
+    .contact-form__label b {
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+    }
+
+    .contact-form__control {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0 var(--contact-field-control-padding);
+        border: 0;
+        border-radius: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--black-ink-color);
+        font: 500 var(--body-size) / var(--grid-size) var(--font-body);
+        letter-spacing: var(--caption-letter-spacing);
+        appearance: none;
+    }
+
+    textarea.contact-form__control {
+        min-height: calc(2 * var(--grid-size));
+        padding-top: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        resize: none;
+    }
+
+    .contact-form__field[data-focused],
+    .contact-form__field[data-filled] {
+        color: var(--gray-ink-color);
+    }
+
+    @supports selector(:focus-within) {
+        .contact-form__field:focus-within {
+            color: var(--gray-ink-color);
+        }
+    }
+
+    .contact-form__field[data-filled] .contact-form__label {
+        top: var(--contact-field-label-offset-top);
+        height: var(--contact-field-label-height);
+        color: var(--gray-ink-color);
+        font-size: var(--caption-size);
+        font-weight: 800;
+    }
+
+    @supports selector(:has(*)) {
+        .contact-form__field:not([data-invalid]):has(
+                .contact-form__control:not(:placeholder-shown)
+            ) {
+            color: var(--gray-ink-color);
+        }
+
+        .contact-form__field:has(.contact-form__control:not(:placeholder-shown))
+            .contact-form__label {
+            top: var(--contact-field-label-offset-top);
+            height: var(--contact-field-label-height);
+            color: var(--gray-ink-color);
+            font-size: var(--caption-size);
+            font-weight: 800;
+        }
+    }
+
+    .contact-form__field[data-invalid] {
+        color: var(--alert-color);
+    }
+
+    .contact-form__field[data-invalid]::before {
+        border-bottom-color: var(--alert-color);
+        border-left-color: var(--alert-color);
+        transition: none;
+    }
+
+    .contact-form__field[data-invalid][data-filled] .contact-form__label {
+        color: var(--alert-color);
+        transition:
+            font-size 160ms ease,
+            top 160ms ease;
+    }
+
+    @supports selector(:has(*)) {
+        .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
+            .contact-form__label {
+            color: var(--alert-color);
+            transition:
+                font-size 160ms ease,
+                top 160ms ease;
+        }
+    }
+
+    .contact-form__error {
+        position: absolute;
+        top: calc(100% + var(--contact-caption-gap));
+        right: var(--contact-error-right-offset);
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        height: var(--contact-field-label-height);
+        margin: 0;
+        color: var(--alert-color);
+        font-family: var(--font-body);
+        font-size: var(--caption-size);
+        font-weight: 500;
+        line-height: 100%;
+        letter-spacing: var(--caption-letter-spacing);
+        text-align: right;
+    }
+
+    .contact-form__error:not([data-visible]) {
+        visibility: hidden;
+    }
+
+    .contact-form__end {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .contact-section__details {
+        display: grid;
+        gap: var(--grid-size);
+        min-width: 0;
+        text-align: right;
+    }
+
+    .contact-section__detail {
+        display: grid;
+        grid-template-rows: repeat(2, var(--grid-size));
+    }
+
+    .contact-section__detail h4,
+    .contact-section__value {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: var(--grid-size);
+    }
+
+    .contact-section__details h4 {
+        color: var(--gray-ink-color);
+    }
+
+    .contact-section__value,
+    :global(.caption.contact-section__time) {
+        margin: 0;
+        color: var(--black-ink-color);
+        font-family: var(--font-body);
+        font-size: var(--body-size);
+        font-weight: 500;
+        line-height: 100%;
+        letter-spacing: var(--caption-letter-spacing);
+    }
+
+    .contact-form__submit {
+        margin-top: auto;
+        margin-bottom: var(--contact-submit-bottom-offset);
+    }
+
+    .contact-form__submit-hint {
+        position: absolute;
+        top: calc(100% + var(--contact-caption-gap));
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--contact-submit-hint-width);
+        height: var(--contact-field-label-height);
+        margin: 0;
+        color: var(--light-gray-ink-color);
+        font-family: var(--font-body);
+        font-size: var(--caption-size);
+        font-weight: 500;
+        line-height: 100%;
+        letter-spacing: var(--caption-letter-spacing);
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .contact-form__submit-hint[aria-hidden='true'] {
+        visibility: hidden;
+    }
+
+    /* ======================================================================
+       Disabled-submit feedback
+       ====================================================================== */
+    @keyframes contact-submit-hint-wiggle {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        25% {
+            transform: translateX(calc(-1 * var(--motion-feedback-distance)));
+        }
+        50% {
+            transform: translateX(var(--motion-feedback-distance));
+        }
+        75% {
+            transform: translateX(calc(-0.5 * var(--motion-feedback-distance)));
+        }
+    }
+
+    .contact-form__submit-hint--wiggle {
+        animation: contact-submit-hint-wiggle var(--motion-feedback-duration)
+            var(--motion-feedback-ease);
+    }
+
+    @media (max-width: 48rem) {
+        .contact-section__content {
+            padding-inline: var(--mobile-page-gutter);
+        }
+
+        .contact-form {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-form__end {
+            min-height: var(--contact-mobile-form-min-height);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .contact-form__field::before,
+        .contact-form__label,
+        .contact-form__field[data-invalid][data-filled] .contact-form__label {
+            transition-duration: 0.01ms;
+        }
+
+        @supports selector(:has(*)) {
+            .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
+                .contact-form__label {
+                transition-duration: 0.01ms;
+            }
+        }
+
+        .contact-form__submit-hint--wiggle {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    import '../scripts/contact-form';
+</script>

@@ -1,0 +1,174 @@
+/* ==========================================================================
+   Base button geometry and color inheritance
+   ========================================================================== */
+.button {
+    --button-ink-color: var(--black-ink-color);
+    --button-shadow-color: var(--button-ink-color);
+    position: relative;
+    isolation: isolate;
+    display: inline-grid;
+    place-items: center;
+    width: var(--button-width);
+    height: var(--button-height);
+    border: var(--button-border-width) solid transparent;
+    border-radius: var(--button-radius);
+    color: var(--button-ink-color);
+    overflow: visible;
+}
+
+button.button {
+    appearance: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+}
+
+.button-secondary {
+    --button-ink-color: var(--gray-ink-color);
+}
+
+/* ==========================================================================
+   Button artwork layers
+   ========================================================================== */
+.button::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--button-border-width));
+    z-index: 2;
+    border: var(--button-border-width) solid var(--button-ink-color);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.button > .button__label {
+    position: relative;
+    z-index: 3;
+    color: var(--button-ink-color);
+}
+
+.button__highlighter,
+.button__shadow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.button__highlighter {
+    z-index: 1;
+    width: var(--button-highlighter-width);
+    height: var(--button-highlighter-height);
+    max-width: none;
+    mix-blend-mode: multiply;
+}
+
+.button__highlighter--disabled {
+    opacity: 0;
+}
+
+.button__shadow {
+    top: var(--button-shadow-default-top);
+    left: var(--button-shadow-default-left);
+    z-index: 0;
+    overflow: visible;
+    transform: none;
+}
+
+.button__shadow path {
+    fill-opacity: var(--button-shadow-opacity);
+}
+
+.button__shadow--default {
+    width: var(--button-shadow-default-width);
+    height: var(--button-shadow-default-height);
+}
+
+.button__shadow--hover {
+    top: var(--button-shadow-hover-top);
+    left: var(--button-shadow-hover-left);
+    width: var(--button-shadow-hover-width);
+    height: var(--button-shadow-hover-height);
+    opacity: 0;
+}
+
+.button__shadow--active {
+    top: calc(50% + var(--button-shadow-active-offset));
+    left: calc(50% + var(--button-shadow-active-offset));
+    width: var(--button-width);
+    height: var(--button-height);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+/* ==========================================================================
+   Hover and pressed states
+   ========================================================================== */
+.button:hover::before,
+.button:hover > .button__label {
+    transform: translate(var(--button-hover-shift), var(--button-hover-shift));
+}
+
+.button:hover .button__shadow--default {
+    opacity: 0;
+}
+
+.button:hover .button__shadow--hover {
+    opacity: 1;
+}
+
+.button:active::before,
+.button:active > .button__label {
+    transform: translate(var(--button-active-shift), var(--button-active-shift));
+}
+
+.button:active::before {
+    border-color: var(--indigo-ink-color);
+}
+
+.button:active > .button__label {
+    color: var(--indigo-ink-color);
+}
+
+.button:active .button__shadow--default,
+.button:active .button__shadow--hover {
+    opacity: 0;
+}
+
+.button:active .button__shadow--active {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Disabled state
+   ========================================================================== */
+.button[aria-disabled='true'] {
+    --button-ink-color: var(--light-gray-ink-color);
+    cursor: not-allowed;
+}
+
+.button[aria-disabled='true']::before,
+.button[aria-disabled='true'] > .button__label {
+    transform: none;
+}
+
+.button[aria-disabled='true']::before {
+    border-color: var(--button-ink-color);
+}
+
+.button[aria-disabled='true'] > .button__label {
+    color: var(--button-ink-color);
+}
+
+.button[aria-disabled='true'] .button__shadow {
+    opacity: 0;
+}
+
+.button[aria-disabled='true'] .button__highlighter--enabled {
+    opacity: 0;
+}
+
+.button[aria-disabled='true'] .button__highlighter--disabled {
+    opacity: 1;
+}

@@ -1,0 +1,19 @@
+---
+// ============================================================================
+// Reusable link-button wrapper
+// ============================================================================
+import ButtonArtwork from './ButtonArtwork.astro';
+import type { ButtonLinkProps } from '../types/button';
+
+interface Props extends ButtonLinkProps {
+    variant: 'primary' | 'secondary';
+}
+
+const { variant, class: className, ...attributes } = Astro.props;
+---
+
+<a {...attributes} class:list={['button', `button-${variant}`, className]}>
+    <ButtonArtwork variant={variant}>
+        <slot />
+    </ButtonArtwork>
+</a>

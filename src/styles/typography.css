@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Local font faces
+   ========================================================================== */
+@font-face {
+    font-family: 'Alegreya Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/alegreya-sans-v28-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Alegreya Sans';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/alegreya-sans-v28-latin-800.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Londrina Solid';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/londrina-solid-v19-latin-regular.woff2') format('woff2');
+}
+
+/* ==========================================================================
+   Metric-compatible fallback faces
+   ========================================================================== */
+@font-face {
+    font-family: 'Londrina Solid Fallback';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Avenir Next Condensed');
+    size-adjust: 98%;
+}
+
+@font-face {
+    font-family: 'Londrina Solid Narrow Fallback';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Arial Narrow');
+    size-adjust: 83%;
+}
+
+@font-face {
+    font-family: 'Alegreya Sans Fallback';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: local('Gill Sans'), local('Gill Sans MT');
+    size-adjust: 95%;
+}
+
+@font-face {
+    font-family: 'Alegreya Sans System Fallback';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: local('Avenir Next'), local('Helvetica Neue'), local('Arial');
+    size-adjust: 85%;
+}
+
+/* ==========================================================================
+   Shared heading defaults
+   ========================================================================== */
+h1,
+h2,
+h3,
+h4,
+.button__label,
+.tab__label {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    color: var(--black-ink-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* ==========================================================================
+   Heading scale
+   ========================================================================== */
+h1 {
+    font-size: var(--heading-1-size);
+    line-height: 100%;
+    letter-spacing: var(--heading-1-letter-spacing);
+    margin-bottom: var(--heading-1-margin-bottom);
+}
+
+h2 {
+    font-size: var(--heading-2-size);
+    line-height: 100%;
+    letter-spacing: var(--heading-2-letter-spacing);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--section-header-divider-gap);
+    margin-inline: calc(-1 * var(--content-divider-extension));
+    text-align: center;
+    color: transparent;
+    -webkit-text-stroke: var(--section-header-stroke-width) var(--black-ink-color);
+    margin-bottom: var(--section-header-margin-bottom);
+}
+
+.section-header::before,
+.section-header::after {
+    content: '';
+    flex: 1 1 0;
+    height: var(--content-divider-thickness);
+    border-radius: var(--content-divider-radius);
+    background-color: var(--content-divider-color);
+}
+
+h3 {
+    font-size: var(--heading-3-size);
+    line-height: var(--heading-3-line-height);
+    letter-spacing: var(--heading-3-letter-spacing);
+}
+
+h4,
+.button__label,
+.tab__label {
+    font-size: var(--heading-4-size);
+    line-height: 100%;
+    letter-spacing: var(--heading-4-letter-spacing);
+}
+
+/* ==========================================================================
+   Body and caption styles
+   ========================================================================== */
+h5,
+.caption {
+    font-family: var(--font-body);
+    font-size: var(--caption-size);
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: var(--caption-letter-spacing);
+    color: var(--black-ink-color);
+    margin: 0;
+}
+
+p {
+    font-family: var(--font-body);
+    font-size: var(--body-size);
+    font-weight: 500;
+    line-height: var(--body-line-height);
+    letter-spacing: var(--body-letter-spacing);
+    color: var(--black-ink-color);
+    margin: 0 0 var(--body-margin-bottom) 0;
+}
+
+/* ==========================================================================
+   Inline emphasis
+   ========================================================================== */
+b,
+strong {
+    font-family: var(--font-body-strong);
+    font-weight: 800;
+    line-height: 100%;
+    color: var(--black-ink-color);
+    margin: 0;
+    padding: 0;
+}

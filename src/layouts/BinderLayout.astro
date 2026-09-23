@@ -1,0 +1,106 @@
+---
+// ============================================================================
+// Shared page shell and document metadata
+// ============================================================================
+import { ClientRouter } from 'astro:transitions';
+import BinderNav from '../components/BinderNav.astro';
+import BinderRings from '../components/BinderRings.astro';
+import ContactSection from '../components/ContactSection.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import '../styles/global.css';
+import '../styles/binder.css';
+
+interface Props {
+    title: string;
+    description: string;
+    noindex?: boolean;
+}
+
+const { title, description, noindex = false } = Astro.props;
+
+const path = Astro.url.pathname;
+const pageKind =
+    path === '/'
+        ? 'home'
+        : path === '/work' || path === '/work/'
+          ? 'work'
+          : path.startsWith('/work/')
+            ? 'case-study'
+            : path === '/about' || path === '/about/'
+              ? 'about'
+              : 'other';
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            rel="preload"
+            href="/fonts/londrina-solid-v19-latin-regular.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        {noindex && <meta name="robots" content="noindex" />}
+        <script is:inline>
+            (() => {
+                const root = document.documentElement;
+                const isHome = window.location.pathname === '/';
+                const storageKey = 'portfolio:home-intro-seen';
+
+                if (!isHome) {
+                    root.dataset.homeEntry = 'regular';
+                    return;
+                }
+
+                try {
+                    const isFirstVisit = !sessionStorage.getItem(storageKey);
+                    root.dataset.homeEntry = isFirstVisit ? 'first' : 'regular';
+                    if (isFirstVisit) sessionStorage.setItem(storageKey, 'true');
+                } catch {
+                    root.dataset.homeEntry = 'regular';
+                }
+            })();
+        </script>
+        <ClientRouter fallback="swap" />
+    </head>
+    <body data-page-kind={pageKind} transition:animate="none">
+        <a class="skip-link" href="#main">
+            Skip to content
+        </a>
+        <div class="binder">
+            <BinderNav />
+
+            <div class="paper">
+                <div class="reader">
+                    <div class="paper-sheet">
+                        <BinderRings />
+
+                        <main
+                            id="main"
+                            class="page"
+                            data-page-kind={pageKind}
+                            tabindex="-1"
+                            aria-label="Page content"
+                        >
+                            <slot />
+                        </main>
+
+                        <ContactSection />
+                    </div>
+
+                    <SiteFooter />
+                </div>
+            </div>
+        </div>
+
+        <script>
+            import '../scripts/site-navigation';
+            import '../scripts/paper-overscroll';
+        </script>
+    </body>
+</html>

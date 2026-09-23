@@ -1,0 +1,66 @@
+---
+// ============================================================================
+// Homepage composition
+// ============================================================================
+import BinderLayout from '../layouts/BinderLayout.astro';
+import PrimaryBtn from '../components/PrimaryBtn.astro';
+import SecondaryBtn from '../components/SecondaryBtn.astro';
+import StickyNote from '../components/StickyNote.astro';
+import WorkCollection from '../components/WorkCollection.astro';
+import { featuredWorks } from '../data/work';
+import '../styles/home.css';
+---
+
+<BinderLayout
+    title="Kevin de Graaf | Design Portfolio"
+    description="I'm a User Experience Designer who enjoys bringing ideas to life from first sketches to final product."
+>
+    <div class="page-content page-content-home">
+        <div class="home-hero">
+            <section class="home-intro">
+                <h1>Hi, I'm Kevin!</h1>
+                <p>
+                    I'm a <b>multidisciplinary designer</b> who enjoys bringing ideas to life
+                </p>
+                <p>
+                    from <b>first sketch</b> to <b>final form</b>.
+                </p>
+                <PrimaryBtn href="/work/">View my work</PrimaryBtn>
+            </section>
+            <section class="sticky-notes-home">
+                <StickyNote
+                    id="home-skills-note"
+                    class="sticky-home-1"
+                    title="What I Do:"
+                    rotation={0.8}
+                >
+                    <ul class="sticky-note-list" role="list">
+                        <li class="sticky-note-list__item">
+                            <p>UX / UI Design</p>
+                        </li>
+                        <li class="sticky-note-list__item">
+                            <p>Visual Design</p>
+                        </li>
+                        <li class="sticky-note-list__item">
+                            <p>Coding</p>
+                        </li>
+                    </ul>
+                </StickyNote>
+                <StickyNote
+                    id="home-contact-note"
+                    class="sticky-home-2"
+                    title="Want to work together?"
+                    rotation={-0.8}
+                >
+                    <div class="sticky-home-2__footer">
+                        <SecondaryBtn href="#contact">Get in touch</SecondaryBtn>
+                    </div>
+                </StickyNote>
+            </section>
+        </div>
+        <section class="home-body" aria-label="Featured work">
+            <h2 class="section-header">Featured Work</h2>
+            <WorkCollection id="featured-projects" works={featuredWorks} />
+        </section>
+    </div>
+</BinderLayout>

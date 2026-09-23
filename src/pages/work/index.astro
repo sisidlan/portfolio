@@ -1,0 +1,24 @@
+---
+// ============================================================================
+// Work index page
+// ============================================================================
+import BinderLayout from '../../layouts/BinderLayout.astro';
+import WorkCollection from '../../components/WorkCollection.astro';
+import { visibleWorks } from '../../data/work';
+---
+
+<BinderLayout
+    title="Kevin de Graaf | Work"
+    description="Selected design projects by Kevin de Graaf, including House of Color."
+>
+    <div class="page-content page-content-work">
+        <WorkCollection
+            id="work-projects"
+            works={visibleWorks}
+            heading="My Work"
+            enableViewToggle
+            defaultView="list"
+            viewStorageKey="portfolio:work-view"
+        />
+    </div>
+</BinderLayout>

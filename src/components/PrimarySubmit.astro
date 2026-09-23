@@ -1,0 +1,19 @@
+---
+// ============================================================================
+// Primary form-submit button API
+// ============================================================================
+import ButtonArtwork from './ButtonArtwork.astro';
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'button'> {
+    class?: string;
+}
+
+const { class: className, type = 'submit', ...attributes } = Astro.props;
+---
+
+<button {...attributes} type={type} class:list={['button', 'button-primary', className]}>
+    <ButtonArtwork variant="primary" includeDisabledHighlighter>
+        <slot />
+    </ButtonArtwork>
+</button>

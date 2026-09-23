@@ -1,0 +1,35 @@
+/* ==========================================================================
+   Reusable list treatment for StickyNote content
+   ========================================================================== */
+.sticky-note-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sticky-note-list-gap);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sticky-note-list__item {
+    display: grid;
+    grid-template-columns: var(--sticky-note-list-bullet-size) minmax(0, 1fr);
+    column-gap: var(--sticky-note-list-column-gap);
+    align-items: start;
+    margin: 0;
+    padding: 0;
+}
+
+.sticky-note-list__item::before {
+    width: var(--sticky-note-list-bullet-size);
+    height: var(--sticky-note-list-bullet-size);
+    margin-top: var(--sticky-note-list-bullet-offset);
+    border-radius: 50%;
+    background-color: var(--gray-ink-color);
+    content: '';
+}
+
+.sticky-note-list__item > p {
+    line-height: 100%;
+    margin: 0;
+}

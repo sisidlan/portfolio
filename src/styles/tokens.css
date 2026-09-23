@@ -1,0 +1,298 @@
+/* ==========================================================================
+   Color palette
+   ========================================================================== */
+:root {
+    --paper-color: #fffdf7;
+    --white-color: #ffffff;
+    --active-tab-highlight-color: #ffffff;
+    --grid-color: #f1f2ef;
+    --margin-color: #ecb4b1;
+    --black-ink-color: #24211f;
+    --gray-ink-color: #696663;
+    --light-gray-ink-color: #959698;
+    --indigo-ink-color: #45438f;
+    --alert-color: #a33a35;
+    --shadow-color: #000000;
+    --soft-shadow-opacity: 0.08;
+    --hard-shadow-opacity: 0.12;
+    --sticky-note-top-color: #fdfbd4;
+    --sticky-note-bottom-color: #fffee5;
+
+    /* base typography */
+    --font-display:
+        'Londrina Solid', 'Londrina Solid Fallback', 'Londrina Solid Narrow Fallback',
+        'Arial Rounded Bold', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+    --font-body:
+        'Alegreya Sans', 'Alegreya Sans Fallback', 'Alegreya Sans System Fallback', 'Gill Sans',
+        'Avenir Next', 'Helvetica Neue', system-ui, sans-serif;
+    --font-body-strong:
+        'Alegreya Sans', 'Gill Sans Bold', 'Avenir Next Demi Bold', 'Helvetica Neue', system-ui,
+        sans-serif;
+
+    --heading-1-size: 4rem;
+    --heading-1-letter-spacing: 0.16rem;
+    --heading-1-margin-bottom: 4.25rem;
+    --heading-2-size: 3rem;
+    --heading-2-letter-spacing: 0.12rem;
+    --section-header-stroke-width: 0.125rem;
+    --section-header-margin-bottom: 6.125rem;
+    --heading-3-size: 1.75rem;
+    --heading-3-line-height: 150%;
+    --heading-3-letter-spacing: 0.08rem;
+    --heading-4-size: 1.25rem;
+    --heading-4-letter-spacing: 0.12rem;
+    --caption-size: 0.75rem;
+    --caption-letter-spacing: 0.04rem;
+    --body-size: 1.25rem;
+    --body-line-height: 125%;
+    --body-letter-spacing: 0.06rem;
+    --body-margin-bottom: 2.5rem;
+
+    /* ==========================================================================
+       SVG paint references
+       ========================================================================== */
+    --gray-tab-color: url(#gray-tab-fill);
+    --gray-tab-outline-color: url(#gray-tab-outline);
+    --green-tab-color: url(#green-tab-fill);
+    --green-tab-outline-color: url(#green-tab-outline);
+    --dark-green-tab-color: url(#dark-green-tab-fill);
+    --dark-green-tab-outline-color: url(#dark-green-tab-outline);
+    --blue-tab-color: url(#work-blue-tab-fill);
+    --blue-tab-outline-color: url(#work-blue-tab-outline);
+    --dark-blue-tab-color: url(#work-dark-blue-tab-fill);
+    --dark-blue-tab-outline-color: url(#work-dark-blue-tab-outline);
+    --pink-tab-color: url(#about-pink-tab-fill);
+    --pink-tab-outline-color: url(#about-pink-tab-outline);
+    --dark-pink-tab-color: url(#about-dark-pink-tab-fill);
+    --dark-pink-tab-outline-color: url(#about-dark-pink-tab-outline);
+
+    --tab-gray-shade: #7e8186;
+    --tab-gray-face: #b8babd;
+    --tab-gray-outline: #d0d2d4;
+    --tab-home-hover-shade: #7f9342;
+    --tab-home-hover-face: #b7cb68;
+    --tab-home-hover-outline: #d0dd91;
+    --tab-home-active-shade: #5d6e2a;
+    --tab-home-active-face: #879a3f;
+    --tab-home-active-outline: #a7b85f;
+    --tab-work-hover-shade: #4f7fa8;
+    --tab-work-hover-face: #7eb6e6;
+    --tab-work-hover-outline: #a9d0f2;
+    --tab-work-active-shade: #355874;
+    --tab-work-active-face: #527fa8;
+    --tab-work-active-outline: #78a4c8;
+    --tab-about-hover-shade: #b96f88;
+    --tab-about-hover-face: #f2a7bf;
+    --tab-about-hover-outline: #f8c8d7;
+    --tab-about-active-shade: #81495d;
+    --tab-about-active-face: #bc7089;
+    --tab-about-active-outline: #d493a8;
+
+    /* ==========================================================================
+       Shared scale and page geometry
+       ========================================================================== */
+    --root-font-size: 100%;
+    --grid-size: 2rem;
+    --grid-line: 0.125rem;
+    --margin-width: 0.25rem;
+    --margin-column: 4;
+    --page-max-width: 108rem;
+    --page-gutter: 10.5rem;
+    --mobile-page-gutter: 2rem;
+    --nav-gutter: 9rem;
+    --page-content-top-gap: 8rem;
+    --paper-corner-radius: 2rem;
+    --paper-corner-overlap: 0.0625rem;
+    --page-footer-gap: 4rem;
+    --footer-bar-height: 4rem;
+    --contact-divider-offset: 4rem;
+    --contact-divider-grid-adjustment: 0px;
+    --content-divider-color: var(--black-ink-color);
+    --content-divider-thickness: 0.125rem;
+    --content-divider-radius: 0.0625rem;
+    --content-divider-extension: 1.5rem;
+    --section-header-divider-gap: 2rem;
+
+    /* ======================================================================
+       Motion and interaction
+       ====================================================================== */
+    --motion-page-entry-duration: var(--motion-home-entry-duration);
+    --motion-page-entry-delay: var(--motion-home-entry-start-delay);
+    --motion-page-entry-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-home-entry-duration: 1200ms;
+    --motion-home-entry-pause: 200ms;
+    --motion-home-entry-step: calc(
+        var(--motion-home-entry-duration) + var(--motion-home-entry-pause)
+    );
+    --motion-home-entry-start-delay: 600ms;
+    --motion-home-entry-copy-delay: calc(
+        var(--motion-home-entry-start-delay) + var(--motion-home-entry-step)
+    );
+    --motion-home-entry-action-delay: calc(
+        var(--motion-home-entry-copy-delay) + var(--motion-home-entry-step)
+    );
+    --motion-home-entry-notes-delay: calc(
+        var(--motion-home-entry-action-delay) + var(--motion-home-entry-step)
+    );
+    --motion-home-entry-body-delay: var(--motion-home-entry-notes-delay);
+    --motion-home-entry-contact-delay: calc(
+        var(--motion-home-entry-body-delay) + var(--motion-home-entry-step)
+    );
+    --motion-case-study-tab-duration: 800ms;
+    --motion-case-study-icon-delay: 600ms;
+    --motion-case-study-icon-rotation: -30deg;
+    --motion-work-view-duration: 800ms;
+    --motion-work-view-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-feedback-duration: 420ms;
+    --motion-feedback-distance: 0.25rem;
+    --motion-feedback-ease: cubic-bezier(0.36, 0, 0.66, -0.56);
+    --motion-scroll-duration: 600ms;
+
+    --focus-outline-width: 0.1875rem;
+    --focus-outline-offset: 0.25rem;
+    --skip-link-offset: 0.5rem;
+    --skip-link-padding-block: 0.75rem;
+    --skip-link-padding-inline: 1rem;
+    --skip-link-hide-gap: 1rem;
+
+    /* ==========================================================================
+       Binder navigation and paper
+       ========================================================================== */
+    --binder-ring-left: -5.1875rem;
+    --binder-ring-artwork-width: 8.1875rem;
+    --binder-ring-artwork-height: 8rem;
+    --binder-ring-visible-height: 5rem;
+    --binder-ring-paper-anchor-y: 3.6875rem;
+    --binder-nav-height: 3rem;
+    --tab-vector-height: 2.8125rem;
+    --compact-tab-width: 6rem;
+    --wide-tab-width: 12rem;
+    --tab-home-vector-width: 6.75rem;
+    --tab-wide-vector-width: 12.75rem;
+    --tab-close-offset: 1rem;
+    --home-icon-width: 1.40625rem;
+    --home-icon-height: 1.25rem;
+    --close-icon-size: 0.989583rem;
+    --tab-overlap-gray-color: var(--tab-gray-shade);
+    --tab-overlap-work-hover-color: var(--tab-work-hover-shade);
+    --tab-overlap-work-active-color: var(--tab-work-active-shade);
+    --tab-overlap-about-hover-color: var(--tab-about-hover-shade);
+    --tab-overlap-about-active-color: var(--tab-about-active-shade);
+
+    /* ==========================================================================
+       Buttons
+       ========================================================================== */
+    --button-width: 12.1875rem;
+    --button-height: 3.5rem;
+    --button-border-width: 0.25rem;
+    --button-radius: 1.75rem;
+    --button-highlighter-width: 15rem;
+    --button-highlighter-height: 11.6875rem;
+    --button-shadow-default-top: 0.5rem;
+    --button-shadow-default-left: 0.5rem;
+    --button-shadow-default-width: 11.899475rem;
+    --button-shadow-default-height: 3.211975rem;
+    --button-shadow-hover-top: 0.5625rem;
+    --button-shadow-hover-left: 0.5625rem;
+    --button-shadow-hover-width: 11.9919375rem;
+    --button-shadow-hover-height: 3.30438125rem;
+    --button-shadow-active-offset: 0.25rem;
+    --button-shadow-opacity: 0.6;
+    --button-hover-shift: -0.125rem;
+    --button-active-shift: 0.25rem;
+
+    /* ==========================================================================
+       Work collections and thumbnails
+       ========================================================================== */
+    --work-list-gap: 10rem;
+    --work-collection-bottom-gap: 4rem;
+    --work-list-column-gap: 5rem;
+    --work-summary-max-width: 34rem;
+    --work-list-mobile-gap: 7rem;
+    --work-list-mobile-entry-gap: 3rem;
+    --work-grid-column-gap: 5rem;
+    --work-grid-row-gap: 8rem;
+    --work-header-bottom-gap: calc(2 * var(--heading-1-margin-bottom));
+    --work-header-height: 4rem;
+    --work-view-toggle-height: 2rem;
+    --work-view-toggle-button-gap: 1rem;
+    --work-view-toggle-content-gap: 0.75rem;
+    --work-view-toggle-padding-left: 0.5rem;
+    --work-view-toggle-padding-right: 0.5rem;
+    --work-view-toggle-padding-top: 0.125rem;
+    --work-view-toggle-icon-box-size: 1.5rem;
+    --work-view-toggle-list-icon-width: 1.29806rem;
+    --work-view-toggle-list-icon-height: 0.9375rem;
+    --work-view-toggle-grid-icon-size: 1.40625rem;
+    --work-view-toggle-active-border-width: 0;
+    --work-view-toggle-radius: 0.5rem;
+    --work-thumbnail-outline-width: 0;
+    --work-thumbnail-frame-width: 0.5rem;
+    --work-thumbnail-frame-height: 3.5rem;
+    --work-thumbnail-caption-padding: 1rem;
+    --work-thumbnail-caption-gap: 0.5rem;
+    --work-thumbnail-arrow-size: 1.75rem;
+    --work-thumbnail-arrow-letter-spacing: 0.08rem;
+    --work-thumbnail-rotation-angle: 0.8deg;
+    --work-thumbnail-zoom: 1.025;
+    --work-thumbnail-pressed-zoom: 1.01;
+    --work-thumbnail-transition-duration: 300ms;
+    --work-thumbnail-soft-shadow-top: 1.795%;
+    --work-thumbnail-soft-shadow-left: -13.998%;
+    --work-thumbnail-soft-shadow-width: 18.254%;
+    --work-thumbnail-soft-shadow-height: 113.988%;
+    --work-thumbnail-hard-shadow-top: 16.533%;
+    --work-thumbnail-hard-shadow-left: -8.357%;
+    --work-thumbnail-hard-shadow-width: 13.889%;
+    --work-thumbnail-hard-shadow-height: 94.048%;
+
+    /* ==========================================================================
+       Sticky notes and list content
+       ========================================================================== */
+    --sticky-note-list-gap: 1rem;
+    --sticky-note-list-bullet-size: 0.5rem;
+    --sticky-note-list-bullet-offset: 0.53125rem;
+    --sticky-note-list-column-gap: 1.5rem;
+
+    /* ==========================================================================
+       Contact form and footer details
+       ========================================================================== */
+    --contact-section-top-gap: 8rem;
+    --contact-caption-gap: 0.25rem;
+    --contact-form-min-height: 16rem;
+    --contact-mobile-form-min-height: 12rem;
+    --contact-field-label-offset: 0.75rem;
+    --contact-field-control-padding: 0.75rem;
+    --contact-field-stroke-top: 0.5rem;
+    --contact-field-corner-radius: 0.5rem;
+    --contact-field-label-offset-top: -1rem;
+    --contact-field-label-height: 1rem;
+    --contact-error-right-offset: 0.25rem;
+    --contact-submit-bottom-offset: 0.1875rem;
+    --contact-submit-hint-width: var(--button-width);
+
+    /* ==========================================================================
+       Home composition
+       ========================================================================== */
+    --home-intro-top-gap: 16.0625rem;
+    --home-intro-button-gap: 5.875rem;
+    --home-notes-width: 28rem;
+    --home-notes-height: 31.5625rem;
+    --home-notes-top-gap: 12.75rem;
+    --home-note-one-top: -1.5rem;
+    --home-note-one-left: 1.75rem;
+    --home-note-two-right: -2.4rem;
+    --home-note-footer-gap: 1.5rem;
+    --home-body-top-gap: 12.25rem;
+
+    /* Diagnostic page values are isolated from the production layout. */
+    --scroll-test-line-height: 1.6;
+    --scroll-test-checkpoint-min-height: 100dvh;
+    --scroll-test-checkpoint-padding-block: 2rem;
+    --scroll-test-checkpoint-padding-inline-min: 1rem;
+    --scroll-test-checkpoint-padding-inline-fluid: 16vw;
+    --scroll-test-checkpoint-padding-inline-max: 14rem;
+    --scroll-test-content-max-width: 42rem;
+    --scroll-test-marker-width: 0.125rem;
+    --scroll-test-end-marker-padding-top: 1rem;
+}

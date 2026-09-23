@@ -1,0 +1,64 @@
+---
+// ============================================================================
+// Netherlands-localized clock output
+// ============================================================================
+interface Props {
+    location?: string;
+    showLocation?: boolean;
+    class?: string;
+}
+
+const { location = 'Breda, The Netherlands', showLocation = true, class: className } = Astro.props;
+---
+
+<p class:list={['caption', className]}>
+    <span data-netherlands-clock hidden>
+        <time data-netherlands-time></time>
+        {showLocation && <> - </>}
+    </span>
+    {showLocation && location}
+</p>
+
+<script>
+    const netherlandsTimeFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/Amsterdam',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    });
+
+    let timer: number | undefined;
+    let clocks: NodeListOf<HTMLTimeElement>;
+
+    function stopClock() {
+        window.clearTimeout(timer);
+    }
+
+    function updateNetherlandsTimes() {
+        const now = new Date();
+        const label = netherlandsTimeFormatter.format(now);
+
+        clocks.forEach((time) => {
+            time.textContent = label;
+            time.dateTime = now.toISOString();
+            time.closest<HTMLElement>('[data-netherlands-clock]')!.hidden = false;
+        });
+
+        // The display has minute precision, so update at the next minute boundary.
+        timer = window.setTimeout(updateNetherlandsTimes, 60_000 - (Date.now() % 60_000));
+    }
+
+    function startClock() {
+        stopClock();
+        clocks = document.querySelectorAll<HTMLTimeElement>('[data-netherlands-time]');
+        if (clocks.length && !document.hidden) updateNetherlandsTimes();
+    }
+
+    // Astro's router keeps module scripts alive between page visits.
+    document.addEventListener('astro:before-swap', stopClock);
+    document.addEventListener('astro:page-load', startClock);
+    document.addEventListener('visibilitychange', startClock);
+    window.addEventListener('pagehide', stopClock);
+    window.addEventListener('pageshow', startClock);
+    startClock();
+</script>

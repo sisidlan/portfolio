@@ -1,0 +1,36 @@
+{
+    "name": "portfolio-kdegraaf",
+    "type": "module",
+    "version": "0.0.1",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "check": "astro check",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "pretest": "npm run build",
+        "test": "playwright test --project=chromium",
+        "test:browsers": "npm run build && playwright test",
+        "validate": "npm run check && npm run format:check && npm test"
+    },
+    "dependencies": {
+        "astro": "^7.3.2"
+    },
+    "allowScripts": {
+        "esbuild": true
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.10",
+        "@playwright/test": "^1.63.0",
+        "@types/node": "^24.13.5",
+        "prettier": "^3.9.7",
+        "prettier-plugin-astro": "^1.0.0",
+        "typescript": "^6.0.3"
+    },
+    "private": true
+}
