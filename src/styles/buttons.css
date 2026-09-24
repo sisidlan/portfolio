@@ -28,6 +28,11 @@ button.button {
     --button-ink-color: var(--gray-ink-color);
 }
 
+.button-primary {
+    /* Keep the multiply artwork and changing shadows in one composited group. */
+    transform: translateZ(0);
+}
+
 /* ==========================================================================
    Button artwork layers
    ========================================================================== */
@@ -50,13 +55,13 @@ button.button {
 .button__highlighter,
 .button__shadow {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
 .button__highlighter {
+    /* Center without a transform on the blending layer itself. */
+    top: calc(50% - var(--button-highlighter-height) / 2);
+    left: calc(50% - var(--button-highlighter-width) / 2);
     z-index: 1;
     width: var(--button-highlighter-width);
     height: var(--button-highlighter-height);

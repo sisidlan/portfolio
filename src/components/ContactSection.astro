@@ -143,20 +143,7 @@ import PrimarySubmit from './PrimarySubmit.astro';
         content: '';
         position: absolute;
         top: calc(-1 * var(--contact-divider-offset) + var(--contact-divider-grid-adjustment));
-        right: max(
-            calc(var(--page-gutter) - var(--content-divider-extension)),
-            calc(
-                (100% - var(--page-max-width)) / 2 + var(--page-gutter) -
-                    var(--content-divider-extension)
-            )
-        );
-        left: max(
-            calc(var(--page-gutter) - var(--content-divider-extension)),
-            calc(
-                (100% - var(--page-max-width)) / 2 + var(--page-gutter) -
-                    var(--content-divider-extension)
-            )
-        );
+        inset-inline: calc(var(--page-gutter) - var(--content-divider-extension));
         height: var(--content-divider-thickness);
         border-radius: var(--content-divider-radius);
         background-color: var(--content-divider-color);

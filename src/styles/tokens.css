@@ -110,7 +110,7 @@
     --content-divider-color: var(--black-ink-color);
     --content-divider-thickness: 0.125rem;
     --content-divider-radius: 0.0625rem;
-    --content-divider-extension: 1.5rem;
+    --content-divider-extension: 0.5rem;
     --section-header-divider-gap: 2rem;
 
     /* ======================================================================
@@ -143,7 +143,7 @@
     --motion-case-study-icon-rotation: -30deg;
     --motion-work-view-duration: 800ms;
     --motion-work-view-ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --motion-feedback-duration: 420ms;
+    --motion-feedback-duration: 200ms;
     --motion-feedback-distance: 0.25rem;
     --motion-feedback-ease: cubic-bezier(0.36, 0, 0.66, -0.56);
     --motion-scroll-duration: 600ms;

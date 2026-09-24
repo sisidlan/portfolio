@@ -1,29 +1,66 @@
-# build output
+# Build output and generated types
 dist/
-# generated types
 .astro/
+*.tsbuildinfo
 
-# dependencies
+# Dependencies and local caches
 node_modules/
+.npm/
+.cache/
+.vite/
+.eslintcache
+.stylelintcache
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Logs
+*.log
+*-debug.log*
+*-error.log*
 
-
-# environment variables
+# Environment secrets (safe examples remain trackable)
 .env
 .env.*
 !.env.example
+!.env.*.example
 
-# macOS-specific files
+# Operating-system and editor artifacts
 .DS_Store
-
-# jetbrains setting folder
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
 
-# Browser test output
+# Test output; test source and configuration remain trackable
 test-results/
 playwright-report/
+playwright/.cache/
+blob-report/
+coverage/
+
+# Local deployment-provider state
+.vercel/
+.netlify/
+.wrangler/
+
+# Local assistant configuration, instructions, and session artifacts
+AGENTS.md
+AGENTS.override.md
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+.agents/
+.codex/
+.claude/
+.cursor/
+.cursorrules
+.cursorignore
+.aider*
+.github/copilot-instructions.md
+
+# Local review notes
+/docs/code-review.md
