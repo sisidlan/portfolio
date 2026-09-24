@@ -243,6 +243,11 @@ const softShadowId = `${id}-thumbnail-soft-shadow`;
     .work-thumbnail__image--finished {
         z-index: 1;
         opacity: 0;
+        /* Keep the photo out of the frame, including while both layers fade. */
+        clip-path: inset(
+            var(--work-thumbnail-frame-width) var(--work-thumbnail-frame-width)
+                var(--work-thumbnail-frame-height)
+        );
     }
 
     .work-thumbnail__image {

@@ -37,6 +37,10 @@
     z-index: 2;
 }
 
+.sticky-home-1 .sticky-note__body {
+    margin-top: var(--sticky-note-skills-gap);
+}
+
 .sticky-home-2 {
     right: var(--home-note-two-right);
     bottom: 0;

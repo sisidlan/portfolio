@@ -17,7 +17,7 @@ export const workProjects = [
         thumbnail: {
             sketch: '/images/house-of-color-sketch.png',
             image: '/images/house-of-color-image.png',
-            alt: '3D mockup of six soda can designs.',
+            alt: '3D soda can mockups of six House of Color flavors.',
         },
     },
     {
@@ -33,7 +33,7 @@ export const workProjects = [
         thumbnail: {
             sketch: '/images/fly-trapped-sketch.png',
             image: '/images/fly-trapped-image.png',
-            alt: 'Still of the game Fly Trapped',
+            alt: 'Starting screen of Fly Trapped',
         },
     },
     {
@@ -49,7 +49,7 @@ export const workProjects = [
         thumbnail: {
             sketch: '/images/klaarhanger-sketch.png',
             image: '/images/klaarhanger-image.png',
-            alt: 'Illustration of a hanger design with various components',
+            alt: 'Illustration of the KlaarHanger hanger design and how to use it',
         },
     },
 ] satisfies WorkProject[];
