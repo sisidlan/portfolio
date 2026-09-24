@@ -8,7 +8,7 @@ export const workProjects = [
         id: 'house-of-color',
         title: 'House of Color',
         summary:
-            'A fictional pride-focused soda brand and their brand book, soda can design, and promotional poster.',
+            'A fictional pride-focused soda brand with a brand book, soda can design, and promotional poster.',
         href: '/work/house-of-color/',
         isVisible: true,
         isFeatured: true,
