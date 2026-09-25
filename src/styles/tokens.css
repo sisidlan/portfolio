@@ -251,8 +251,8 @@
        ========================================================================== */
     --sticky-note-list-gap: 1.5rem;
     --sticky-note-list-bullet-size: 0.5rem;
-    --sticky-note-list-bullet-offset: 0.53125rem;
-    --sticky-note-list-column-gap: 1.5rem;
+    --sticky-note-list-bullet-offset: 0.375rem;
+    --sticky-note-list-column-gap: 1.25rem;
     --sticky-note-skills-gap: 2rem;
 
     /* ==========================================================================
