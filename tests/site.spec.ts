@@ -732,6 +732,43 @@ test('work page toggles between persistent list and grid views', async ({ page }
     await expect(entry.getByRole('link', { name: 'View Case Study', exact: true })).toBeVisible();
 });
 
+test('contact section and footer stay on the paper grid after repeated work view changes', async ({
+    page,
+}) => {
+    await page.setViewportSize({ width: 1376, height: 1000 });
+    await page.goto('/work/');
+
+    for (const view of ['grid', 'list', 'grid', 'list']) {
+        await page.getByRole('button', { name: `${view} view`, exact: false }).click();
+        await expect(page.locator('#work-projects')).not.toHaveAttribute('data-work-transition');
+        await expect
+            .poll(() =>
+                page.evaluate(() => {
+                    const reader = document.querySelector('.reader')!.getBoundingClientRect();
+                    const content = document.querySelector('.contact-section__content')!;
+                    const form = document.querySelector('[data-contact-form]')!;
+                    const root = getComputedStyle(document.documentElement);
+                    const token = root.getPropertyValue('--grid-size').trim();
+                    const grid =
+                        parseFloat(token) * (token.endsWith('rem') ? parseFloat(root.fontSize) : 1);
+                    const positions = [
+                        form.getBoundingClientRect().top,
+                        content.getBoundingClientRect().top +
+                            parseFloat(getComputedStyle(content, '::before').top),
+                        document.querySelector('.site-footer')!.getBoundingClientRect().top,
+                    ];
+                    return Math.max(
+                        ...positions.map((top) => {
+                            const phase = (((top - reader.top) % grid) + grid) % grid;
+                            return Math.min(phase, grid - phase);
+                        }),
+                    );
+                }),
+            )
+            .toBeLessThan(0.1);
+    }
+});
+
 test('tab hover and pressed palettes preserve their SVG paint references', async ({ page }) => {
     await page.goto('/work/house-of-color/');
     for (const [kind, hover, active] of [

@@ -190,6 +190,10 @@ class WorkViewSwitcher extends HTMLElement {
             this.setButtonState(view);
         }
 
+        if (currentView !== view) {
+            this.dispatchEvent(new Event('work:view-change', { bubbles: true }));
+        }
+
         if (persist && this.dataset.storageKey) {
             try {
                 sessionStorage.setItem(this.dataset.storageKey, view);

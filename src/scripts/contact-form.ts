@@ -204,6 +204,7 @@ function connectContactForms() {
 }
 
 document.addEventListener('astro:page-load', connectContactForms);
+document.addEventListener('work:view-change', connectContactForms);
 window.addEventListener('resize', connectContactForms);
 window.addEventListener('pageshow', connectContactForms);
 void document.fonts.ready.then(connectContactForms);
