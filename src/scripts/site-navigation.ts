@@ -1,4 +1,4 @@
-import { navigate } from 'astro:transitions/client';
+import { navigate, swapFunctions } from 'astro:transitions/client';
 
 // ============================================================================
 // Selectors, URL parameters, and history state
@@ -502,6 +502,34 @@ function isCurrentPageTab(link: HTMLAnchorElement) {
 // ============================================================================
 // Event wiring and lifecycle initialization
 // ============================================================================
+function swapBinderPage(incomingDocument: Document, defaultSwap: () => void) {
+    const nav = document.querySelector<HTMLElement>('.binder-nav');
+    const incomingNav = incomingDocument.querySelector<HTMLElement>('.binder-nav');
+    const paper = getPaper();
+    const incomingPaper = incomingDocument.querySelector<HTMLElement>('.paper');
+    if (!nav || !incomingNav || !paper || !incomingPaper) {
+        defaultSwap();
+        return;
+    }
+
+    swapFunctions.deselectScripts(incomingDocument);
+    swapFunctions.swapRootAttributes(incomingDocument);
+    swapFunctions.swapHeadElements(incomingDocument);
+    const restoreFocus = swapFunctions.saveFocus();
+
+    // Keep the shell and its sticky nav connected: Safari uses the nav's renderer
+    // as its toolbar color source. Only route-specific contents need replacing.
+    for (const attribute of [...document.body.attributes]) {
+        document.body.removeAttribute(attribute.name);
+    }
+    for (const attribute of incomingDocument.body.attributes) {
+        document.body.setAttribute(attribute.name, attribute.value);
+    }
+    nav.replaceChildren(...incomingNav.childNodes);
+    swapFunctions.swapBodyElement(incomingPaper, paper);
+    restoreFocus();
+}
+
 function prepareAlternateNavigation(event: MouseEvent) {
     if (event.defaultPrevented || !(event.target instanceof Element)) return;
     const link = event.target.closest<HTMLAnchorElement>(CASE_STUDY_LINK_SELECTOR);
@@ -620,6 +648,8 @@ document.addEventListener('astro:before-preparation', savePaperPosition);
 document.addEventListener('astro:before-swap', (event) => {
     beginPageEntryMotion(event.newDocument);
     disconnectPaperPositionTracking();
+    const defaultSwap = event.swap;
+    event.swap = () => swapBinderPage(event.newDocument, defaultSwap);
 });
 document.addEventListener('astro:after-swap', initializeSiteNavigation);
 document.addEventListener('astro:page-load', finishSiteNavigation);

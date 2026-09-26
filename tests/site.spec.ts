@@ -272,6 +272,24 @@ test('client navigation preserves tab selection, overlap, and case-study close b
     page,
 }) => {
     await page.goto('/');
+    const shell = await page.evaluateHandle(() => {
+        const elements = [
+            document.body,
+            document.querySelector('.binder'),
+            document.querySelector('.binder-nav'),
+        ];
+        const state = { elements, detached: false };
+        new MutationObserver((records) => {
+            state.detached ||= records.some((record) =>
+                [...record.removedNodes].some((node) =>
+                    elements.some(
+                        (element) => element && (node === element || node.contains(element)),
+                    ),
+                ),
+            );
+        }).observe(document.documentElement, { childList: true, subtree: true });
+        return state;
+    });
     await page.getByRole('link', { name: 'About', exact: true }).click();
     await expect(page).toHaveURL('/about/');
     await expect(page.locator('.tab-about')).toHaveAttribute('aria-current', 'page');
@@ -286,6 +304,12 @@ test('client navigation preserves tab selection, overlap, and case-study close b
     await expect(page).toHaveURL('/work/');
     await page.getByRole('link', { name: 'Home', exact: true }).click();
     await expect(page).toHaveURL('/');
+    expect(
+        await shell.evaluate(({ elements, detached }) => ({
+            detached,
+            connected: elements.every((element) => element?.isConnected),
+        })),
+    ).toEqual({ detached: false, connected: true });
 });
 
 test('the active home tab returns the paper to the top', async ({ page }) => {
