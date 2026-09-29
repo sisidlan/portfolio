@@ -25,7 +25,7 @@
     height: var(--sticky-note-list-bullet-size);
     margin-top: var(--sticky-note-list-bullet-offset);
     border-radius: 50%;
-    background-color: var(--gray-ink-color);
+    background-color: var(--light-gray-ink-color);
     content: '';
 }
 
