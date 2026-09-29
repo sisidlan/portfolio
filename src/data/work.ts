@@ -21,22 +21,6 @@ export const workProjects = [
         },
     },
     {
-        id: 'fly-trapped',
-        title: 'Fly Trapped',
-        summary:
-            'A pixel-art side-scroller inspired by Flappy Bird with handmade visuals, animations, audio, and expanded gameplay mechanics.',
-        href: '/work/fly-trapped/',
-        isVisible: true,
-        isFeatured: true,
-        order: 2,
-        featuredOrder: 2,
-        thumbnail: {
-            sketch: '/images/fly-trapped-sketch.png',
-            image: '/images/fly-trapped-image.png',
-            alt: 'Starting screen of Fly Trapped',
-        },
-    },
-    {
         id: 'klaarhanger',
         title: 'KlaarHanger',
         summary:
@@ -44,12 +28,28 @@ export const workProjects = [
         href: '/work/klaarhanger/',
         isVisible: true,
         isFeatured: true,
-        order: 3,
-        featuredOrder: 3,
+        order: 2,
+        featuredOrder: 2,
         thumbnail: {
             sketch: '/images/klaarhanger-sketch.png',
             image: '/images/klaarhanger-image.png',
             alt: 'Illustration of the KlaarHanger hanger design and how to use it',
+        },
+    },
+    {
+        id: 'fly-trapped',
+        title: 'Fly Trapped',
+        summary:
+            'A pixel-art side-scroller inspired by Flappy Bird with handmade visuals, animations, audio, and expanded gameplay mechanics.',
+        href: '/work/fly-trapped/',
+        isVisible: true,
+        isFeatured: true,
+        order: 3,
+        featuredOrder: 3,
+        thumbnail: {
+            sketch: '/images/fly-trapped-sketch.png',
+            image: '/images/fly-trapped-image.png',
+            alt: 'Starting screen of Fly Trapped',
         },
     },
 ] satisfies WorkProject[];
