@@ -4,14 +4,18 @@
 // ============================================================================
 import NetherlandsTime from './NetherlandsTime.astro';
 import PrimarySubmit from './PrimarySubmit.astro';
+import ButtonArtwork from './ButtonArtwork.astro';
+
+const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
 ---
 
-<section id="contact" class="contact-section" aria-labelledby="contact-heading">
+<section id="contact" class="contact-section" aria-labelledby="contact-heading" tabindex="-1">
     <div class="contact-section__content">
         <form
             class="contact-form"
             data-contact-form
             data-astro-reload
+            action={endpoint || undefined}
             method="post"
             accept-charset="UTF-8"
         >
@@ -108,9 +112,50 @@ import PrimarySubmit from './PrimarySubmit.astro';
                     </div>
                 </aside>
 
-                <PrimarySubmit class="contact-form__submit" data-contact-submit>
-                    Send
-                </PrimarySubmit>
+                <div class="contact-form__actions">
+                    <button
+                        type="button"
+                        class="button button-secondary"
+                        data-contact-cancel
+                        hidden
+                    >
+                        <ButtonArtwork variant="secondary">Cancel</ButtonArtwork>
+                    </button>
+                    <PrimarySubmit class="contact-form__submit" data-contact-submit>
+                        Send
+                    </PrimarySubmit>
+                    <p class="contact-form__success" data-contact-success hidden aria-hidden="true">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 32 32"
+                            fill="none"
+                            aria-hidden="true"
+                            focusable="false"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M29.3334 16C29.3334 23.3637 23.3638 29.3333 16.0001 29.3333C8.63628 29.3333 2.66675 23.3637 2.66675 16C2.66675 8.63616 8.63628 2.66663 16.0001 2.66663C23.3638 2.66663 29.3334 8.63616 29.3334 16ZM21.3738 11.9595C21.7643 12.35 21.7643 12.9832 21.3738 13.3737L14.7071 20.0404C14.3166 20.4309 13.6835 20.4309 13.293 20.0404L10.6263 17.3737C10.2358 16.9832 10.2358 16.3501 10.6263 15.9596C11.0168 15.569 11.65 15.569 12.0405 15.9596L14.0001 17.919L16.9798 14.9393L19.9597 11.9595C20.3502 11.569 20.9833 11.569 21.3738 11.9595Z"
+                                fill="currentColor"
+                            />
+                        </svg>
+                        <span>Message sent successfully</span>
+                    </p>
+                    <p
+                        class="contact-form__delivery-error"
+                        data-contact-delivery-error
+                        role="alert"
+                        hidden
+                    ></p>
+                </div>
+                <p
+                    class="contact-form__announcement"
+                    data-contact-status
+                    role="status"
+                    aria-atomic="true"
+                ></p>
                 <p
                     class="contact-form__submit-hint"
                     id="contact-submit-hint"
@@ -393,9 +438,68 @@ import PrimarySubmit from './PrimarySubmit.astro';
         letter-spacing: var(--caption-letter-spacing);
     }
 
-    .contact-form__submit {
+    .contact-form__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--contact-action-gap);
+        flex-wrap: wrap;
+        max-width: 100%;
+        min-height: var(--button-height);
         margin-top: auto;
         margin-bottom: var(--contact-submit-bottom-offset);
+    }
+
+    .contact-form__actions > [hidden] {
+        display: none;
+    }
+
+    /* Override the filled-state :has selectors while keeping labels above their values. */
+    .contact-form:is([data-contact-state='confirming'], [data-contact-state='sending'])
+        .contact-form__field[data-contact-field],
+    .contact-form:is([data-contact-state='confirming'], [data-contact-state='sending'])
+        .contact-form__field[data-contact-field]
+        :is(.contact-form__label, .contact-form__control) {
+        color: var(--light-gray-ink-color);
+    }
+
+    .contact-form__success,
+    .contact-form__delivery-error {
+        display: flex;
+        align-items: center;
+        gap: var(--contact-success-gap);
+        max-width: 100%;
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--heading-4-size);
+        font-weight: 400;
+        line-height: 100%;
+        letter-spacing: var(--heading-4-letter-spacing);
+        text-transform: uppercase;
+    }
+
+    .contact-form__success {
+        color: var(--confirmation-color);
+    }
+
+    .contact-form__success svg {
+        flex: 0 0 var(--contact-checkmark-size);
+        width: var(--contact-checkmark-size);
+        height: var(--contact-checkmark-size);
+    }
+
+    .contact-form__delivery-error {
+        color: var(--alert-color);
+        text-align: right;
+    }
+
+    .contact-form__announcement {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
     }
 
     .contact-form__submit-hint {

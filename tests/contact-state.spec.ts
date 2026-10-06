@@ -43,7 +43,7 @@ test('autofill changes and form reset keep validation, labels, and send availabi
     await expect(send).toBeFocused();
 });
 
-test('invalid submissions stay on the page and valid values reach a configured native form action', async ({
+test('invalid submissions stay on the page and confirmed values reach a configured endpoint', async ({
     page,
 }) => {
     await page.goto('/');
@@ -53,7 +53,10 @@ test('invalid submissions stay on the page and valid values reach a configured n
     await page.route('**/contact-test/', async (route) => {
         expect(route.request().method()).toBe('POST');
         submissions.push(route.request().postData() ?? '');
-        await route.fulfill({ contentType: 'text/html', body: '<h1>Message received</h1>' });
+        await route.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify({ ok: true }),
+        });
     });
     await form.evaluate((element: HTMLFormElement) => {
         element.action = '/contact-test/';
@@ -67,7 +70,11 @@ test('invalid submissions stay on the page and valid values reach a configured n
     await form.locator('#contact-email').fill('hello@example.com');
     await form.locator('#contact-message').fill('A message with <markup> & punctuation.');
     await send.click();
-    await expect(page).toHaveURL('/contact-test/');
+    await expect(form).toHaveAttribute('data-contact-state', 'confirming');
+    expect(submissions).toHaveLength(0);
+    await form.getByRole('button', { name: 'Confirm', exact: true }).click();
+    await expect(form).toHaveAttribute('data-contact-state', 'success');
+    await expect(page).toHaveURL('/');
     expect(submissions).toHaveLength(1);
     expect(Object.fromEntries(new URLSearchParams(submissions[0]))).toEqual({
         name: 'Kevin & team',

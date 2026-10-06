@@ -108,6 +108,25 @@ button:focus {
     will-change: auto !important;
 }
 
+/* Keyboard access never waits for a decorative entry sequence, including without JS. */
+.home-intro > .button-primary:focus-within,
+.sticky-notes-home:focus-within,
+.home-body:focus-within,
+.work-browser__content:focus-within,
+.work-view-toggle:focus-within,
+.page-content > :focus-within,
+.contact-section:focus-within {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    opacity: 1 !important;
+}
+
+[data-page-entry-revealed] {
+    animation: none !important;
+    opacity: 1 !important;
+    will-change: auto !important;
+}
+
 /* Hold swapped content at its opening keyframe until Astro has initialized the new page. */
 :root[data-page-entry-pending='true']
     :is(

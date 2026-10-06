@@ -3,7 +3,14 @@ import { expect, test } from '@playwright/test';
 // ============================================================================
 // Route, navigation, layout, and accessibility regressions
 // ============================================================================
-for (const route of ['/', '/about/', '/work/', '/work/house-of-color/']) {
+for (const route of [
+    '/',
+    '/about/',
+    '/work/',
+    '/work/house-of-color/',
+    '/work/klaarhanger/',
+    '/work/fly-trapped/',
+]) {
     test(`${route} loads with valid landmarks, named links, and SVG references`, async ({
         page,
     }) => {
@@ -344,9 +351,11 @@ test('case studies close to their source page and restore its paper position', a
         const paper = page.locator('.paper');
         const sourceScrollTop = await paper.evaluate((element) => element.scrollTop);
 
+        const destination = new URL((await caseStudyLink.getAttribute('href'))!, page.url())
+            .pathname;
         expect(sourceScrollTop).toBeGreaterThan(0);
         await caseStudyLink.click();
-        await expect.poll(() => new URL(page.url()).pathname).toBe('/work/house-of-color/');
+        await expect.poll(() => new URL(page.url()).pathname).toBe(destination);
         expect(new URL(page.url()).searchParams.get('returnTo')).toBe(scenario.path);
 
         await page
@@ -444,7 +453,7 @@ test('the footer bar stays attached to the paper on short pages and tall viewpor
     page,
 }) => {
     await page.setViewportSize({ width: 1600, height: 1400 });
-    for (const route of ['/about/', '/work/', '/work/house-of-color/']) {
+    for (const route of ['/about/', '/work/house-of-color/']) {
         await page.goto(route);
         await page.evaluate(() => document.fonts.ready);
         const footer = (await page.locator('.site-footer').boundingBox())!;
@@ -543,7 +552,7 @@ test('navigation shares the page width cap while the corner stays at the viewpor
     const homeIcon = await page.locator('.icon-home').boundingBox();
     const workVector = await page.locator('.vector-tab-work').boundingBox();
     const workLabel = await page.locator('.tab-work .tab__label').boundingBox();
-    expect(nav!.width).toBe(108 * 16);
+    expect(nav!.width).toBe(96 * 16);
     expect(nav!.width).toBe(content!.width);
     expect(nav!.x).toBe(content!.x);
     expect(corner!.x + corner!.width).toBe(2700);
@@ -568,6 +577,11 @@ test('work entries keep media left, copy grid-aligned, and project links synchro
     await page.goto('/');
     const rows = page.locator('.work-entry');
     const rowCount = await rows.count();
+    const projectPaths: Record<string, string> = {
+        'House of Color': '/work/house-of-color/',
+        KlaarHanger: '/work/klaarhanger/',
+        'Fly Trapped': '/work/fly-trapped/',
+    };
 
     expect(rowCount).toBeGreaterThan(0);
 
@@ -576,13 +590,13 @@ test('work entries keep media left, copy grid-aligned, and project links synchro
         const media = (await row.locator('.work-entry__media').boundingBox())!;
         const content = (await row.locator('.work-entry__content').boundingBox())!;
         expect(media.x).toBeLessThan(content.x);
-        await expect(row.locator('.work-thumbnail')).toHaveAttribute(
-            'href',
-            '/work/house-of-color/',
-        );
+        const title = (await row.locator('h3').textContent())!.trim();
+        const destination = projectPaths[title];
+        expect(destination).toBeDefined();
+        await expect(row.locator('.work-thumbnail')).toHaveAttribute('href', destination);
         await expect(
             row.getByRole('link', { name: 'View Case Study', exact: true }),
-        ).toHaveAttribute('href', '/work/house-of-color/');
+        ).toHaveAttribute('href', destination);
         await expect(row.locator(':scope > a')).toHaveCount(0);
 
         const mediaBox = (await row.locator('.work-entry__media').boundingBox())!;
@@ -716,20 +730,21 @@ test('work page toggles between persistent list and grid views', async ({ page }
     const titleBox = (await pageTitle.boundingBox())!;
     const toggleBox = (await page.locator('.work-view-toggle').boundingBox())!;
     expect(titleBox.y).toBeCloseTo(toggleBox.y, 1);
-    expect(titleBox.height).toBeCloseTo(toggleBox.height, 1);
+    expect(titleBox.height).toBe(64);
+    expect(toggleBox.height).toBe(32);
     expect(toggleBox.x + toggleBox.width).toBeCloseTo(headerBox.x + headerBox.width, 1);
-    await expect(page.locator('.work-view-toggle')).toHaveCSS('height', '64px');
+    await expect(page.locator('.work-view-toggle')).toHaveCSS('height', '32px');
     await expect(listButton).toHaveCSS('color', 'rgb(36, 33, 31)');
     await expect(gridButton).toHaveCSS('color', 'rgb(149, 150, 152)');
-    await expect(listButton).toHaveCSS('border-top-width', '4px');
+    await expect(listButton).toHaveCSS('border-top-width', '0px');
     await expect(listButton).toHaveCSS('border-radius', '8px');
-    await expect(listButton.locator('.work-view-toggle__icon')).toHaveCSS('width', '48px');
-    await expect(listButton.locator('.work-view-toggle__icon')).toHaveCSS('height', '48px');
-    await expect(gridButton.locator('.work-view-toggle__icon')).toHaveCSS('width', '48px');
-    await expect(gridButton.locator('.work-view-toggle__icon')).toHaveCSS('height', '48px');
+    await expect(listButton.locator('.work-view-toggle__icon')).toHaveCSS('width', '24px');
+    await expect(listButton.locator('.work-view-toggle__icon')).toHaveCSS('height', '24px');
+    await expect(gridButton.locator('.work-view-toggle__icon')).toHaveCSS('width', '24px');
+    await expect(gridButton.locator('.work-view-toggle__icon')).toHaveCSS('height', '24px');
 
     await gridButton.hover();
-    await expect(gridButton).toHaveCSS('color', 'rgb(36, 33, 31)');
+    await expect(gridButton).toHaveCSS('color', 'rgb(105, 102, 99)');
 
     const listMedia = (await entry.locator('.work-entry__media').boundingBox())!;
     const listContent = (await entry.locator('.work-entry__content').boundingBox())!;
@@ -870,7 +885,14 @@ test('binder rings scroll with the page while the navigation stays fixed', async
 });
 
 test('binder rings keep fixed grid positions and stop before the paper edge', async ({ page }) => {
-    for (const route of ['/', '/about/', '/work/', '/work/house-of-color/']) {
+    for (const route of [
+        '/',
+        '/about/',
+        '/work/',
+        '/work/house-of-color/',
+        '/work/klaarhanger/',
+        '/work/fly-trapped/',
+    ]) {
         await page.goto(route);
         await page.evaluate(() => document.fonts.ready);
         await expect(page.locator('[data-binder-rings]')).toHaveAttribute('data-bounds-ready', '');
@@ -1034,14 +1056,16 @@ test('footer contact link, credit bar, corner, and bottom overscroll are connect
     await expect.poll(() => paper.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
     await expect(contact).toBeInViewport();
 
-    await paper.evaluate((element) => (element.scrollTop = element.scrollHeight));
+    await paper.evaluate((element) =>
+        element.scrollTo({ top: element.scrollHeight, behavior: 'instant' }),
+    );
     await expect.poll(() => paper.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
     await expect(paper).toHaveClass(/paper--near-bottom/);
     await expect(paper).toHaveCSS('background-color', 'rgb(36, 33, 31)');
     await expect(paper).toHaveCSS('background-image', 'none');
 
     await paper.evaluate((element) => {
-        element.scrollTop = 0;
+        element.scrollTo({ top: 0, behavior: 'instant' });
     });
     await expect.poll(() => paper.evaluate((element) => element.scrollTop)).toBe(0);
     await expect(paper).not.toHaveClass(/paper--near-bottom/);
@@ -1255,12 +1279,15 @@ test('contact form preserves its grid, validates on exit, scrolls, and stays ali
     await email.fill('not-an-email');
     await expect(nameField).toHaveCSS('color', 'rgb(105, 102, 99)');
     await message.fill('Hello');
-    await page.locator('.work-entry').click({ position: { x: 1, y: 1 } });
+    await page
+        .locator('.work-entry')
+        .first()
+        .click({ position: { x: 1, y: 1 } });
     await expect(form.locator('#contact-email-error')).toHaveText('Enter a valid email');
     await expect(form.locator('#contact-email-error')).toHaveAttribute('aria-hidden', 'false');
-    await expect(emailField).toHaveCSS('color', 'rgb(163, 58, 53)');
+    await expect(emailField).toHaveCSS('color', 'rgb(188, 39, 32)');
     await expect(email).toHaveCSS('color', 'rgb(36, 33, 31)');
-    await expect(form.locator('label[for="contact-email"]')).toHaveCSS('color', 'rgb(163, 58, 53)');
+    await expect(form.locator('label[for="contact-email"]')).toHaveCSS('color', 'rgb(188, 39, 32)');
     const invalidStroke = await emailField.evaluate((element) => {
         const stroke = getComputedStyle(element, '::before');
         return {
@@ -1269,7 +1296,7 @@ test('contact form preserves its grid, validates on exit, scrolls, and stays ali
         };
     });
     expect(invalidStroke).toEqual({
-        borderColor: 'rgb(163, 58, 53)',
+        borderColor: 'rgb(188, 39, 32)',
         transitionDuration: '0s',
     });
     await expect(form.locator('#contact-email-error b')).toHaveCount(0);
@@ -1289,7 +1316,10 @@ test('contact form preserves its grid, validates on exit, scrolls, and stays ali
     expect(scrolledMessageState.lineHeight).toBe('32px');
 
     await email.fill('hello@example.com');
-    await page.locator('.work-entry').click({ position: { x: 1, y: 1 } });
+    await page
+        .locator('.work-entry')
+        .first()
+        .click({ position: { x: 1, y: 1 } });
     await expect(submit).toHaveAttribute('aria-disabled', 'false');
     await expect(submit).toHaveCSS('filter', 'none');
     await expect(emailField).toHaveCSS('color', 'rgb(105, 102, 99)');

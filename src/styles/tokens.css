@@ -11,7 +11,8 @@
     --gray-ink-color: #696663;
     --light-gray-ink-color: #959698;
     --indigo-ink-color: #45438f;
-    --alert-color: #BC2720;
+    --alert-color: #bc2720;
+    --confirmation-color: #27823b;
     --shadow-color: #000000;
     --soft-shadow-opacity: 0.08;
     --hard-shadow-opacity: 0.12;
@@ -146,7 +147,6 @@
     --motion-feedback-duration: 320ms;
     --motion-feedback-distance: 0.25rem;
     --motion-feedback-ease: cubic-bezier(0.36, 0, 0.66, -0.56);
-    --motion-scroll-duration: 420ms;
 
     --focus-outline-width: 0.1875rem;
     --focus-outline-offset: 0.25rem;
@@ -271,6 +271,12 @@
     --contact-error-right-offset: 0.25rem;
     --contact-submit-bottom-offset: 0.1875rem;
     --contact-submit-hint-width: var(--button-width);
+    --contact-action-gap: 2rem;
+    --contact-success-gap: 1rem;
+    --contact-checkmark-size: 2rem;
+    --contact-confirm-delay: 3000ms;
+    --contact-success-duration: 5000ms;
+    --contact-error-duration: 5000ms;
 
     /* ==========================================================================
        Home composition

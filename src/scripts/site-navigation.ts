@@ -33,10 +33,8 @@ const returnLabels = new Map([
 let trackedPaper: HTMLElement | null = null;
 let trackedPath: string | null = null;
 let scrollStateTimer: number | null = null;
-let scrollAnimationFrame: number | null = null;
-let scrollAnimationToken = 0;
-let scrollAnimationPaper: HTMLElement | null = null;
-let scrollAnimationPreviousBehavior = '';
+let finishCloseTabExit: (() => void) | null = null;
+let cancelPaperScroll: (() => void) | null = null;
 
 // ============================================================================
 // Shared navigation helpers
@@ -116,22 +114,6 @@ function getScrollPosition(value: string | null) {
     if (value === null || value.trim() === '') return null;
     const position = Number(value);
     return Number.isFinite(position) && position >= 0 ? position : null;
-}
-
-function cancelPaperScrollAnimation() {
-    scrollAnimationToken += 1;
-    if (scrollAnimationFrame !== null) window.cancelAnimationFrame(scrollAnimationFrame);
-    scrollAnimationFrame = null;
-
-    if (scrollAnimationPaper) {
-        if (scrollAnimationPreviousBehavior) {
-            scrollAnimationPaper.style.scrollBehavior = scrollAnimationPreviousBehavior;
-        } else {
-            scrollAnimationPaper.style.removeProperty('scroll-behavior');
-        }
-    }
-    scrollAnimationPaper = null;
-    scrollAnimationPreviousBehavior = '';
 }
 
 // ============================================================================
@@ -243,7 +225,7 @@ function restoreReloadPosition() {
 }
 
 function disconnectPaperPositionTracking() {
-    cancelPaperScrollAnimation();
+    cancelPaperScroll?.();
     trackedPaper?.removeEventListener('scroll', schedulePaperPositionSave);
     if (scrollStateTimer !== null) window.clearTimeout(scrollStateTimer);
     scrollStateTimer = null;
@@ -362,57 +344,80 @@ function getElementScrollTop(element: HTMLElement, paper: HTMLElement) {
 }
 
 function animatePaperScroll(targetTop: number) {
+    cancelPaperScroll?.();
     const paper = getPaper();
     if (!paper) return;
 
-    cancelPaperScrollAnimation();
-
-    const maximumScrollTop = Math.max(0, paper.scrollHeight - paper.clientHeight);
-    const endTop = Math.min(maximumScrollTop, Math.max(0, targetTop));
-    const startTop = paper.scrollTop;
-    const distance = endTop - startTop;
-
-    if (Math.abs(distance) < 0.5 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        paper.scrollTop = endTop;
+    const endTop = Math.min(
+        Math.max(0, paper.scrollHeight - paper.clientHeight),
+        Math.max(0, targetTop),
+    );
+    if (Math.abs(paper.scrollTop - endTop) < 0.5) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        paper.scrollTo({ top: endTop, behavior: 'instant' });
         return;
     }
 
-    const duration = Math.max(0, getMotionDuration('--motion-scroll-duration', 600));
-    if (duration === 0) {
-        paper.scrollTop = endTop;
-        return;
-    }
-
-    const token = scrollAnimationToken;
-    const startTime = performance.now();
-    scrollAnimationPaper = paper;
-    scrollAnimationPreviousBehavior = paper.style.scrollBehavior;
-    paper.style.scrollBehavior = 'auto';
-
+    // Let the browser animate; explicitly yield to user input because native
+    // smooth scrolling is not consistently interrupted by wheel input in Chromium.
+    const controller = new AbortController();
+    const options = { passive: true, signal: controller.signal };
+    let scrollEndTimer: number | undefined;
     const finish = () => {
-        if (token !== scrollAnimationToken) return;
-        if (scrollAnimationPreviousBehavior) {
-            paper.style.scrollBehavior = scrollAnimationPreviousBehavior;
-        } else {
-            paper.style.removeProperty('scroll-behavior');
-        }
-        scrollAnimationPaper = null;
-        scrollAnimationPreviousBehavior = '';
-        scrollAnimationFrame = null;
+        window.clearTimeout(scrollEndTimer);
+        controller.abort();
+        cancelPaperScroll = null;
     };
-
-    const step = (time: number) => {
-        if (token !== scrollAnimationToken || !paper.isConnected) return;
-
-        const progress = Math.min(1, (time - startTime) / duration);
-        const easedProgress = 1 - (1 - progress) ** 3;
-        paper.scrollTop = startTop + distance * easedProgress;
-
-        if (progress < 1) scrollAnimationFrame = window.requestAnimationFrame(step);
-        else finish();
+    const cancel = () => {
+        finish();
+        paper.scrollTo({ top: paper.scrollTop, behavior: 'instant' });
     };
-
-    scrollAnimationFrame = window.requestAnimationFrame(step);
+    cancelPaperScroll = cancel;
+    for (const type of ['wheel', 'touchstart', 'pointerdown']) {
+        paper.addEventListener(type, cancel, options);
+    }
+    document.addEventListener(
+        'keydown',
+        (event) => {
+            // Tab lets native focus scrolling take over; stopping it here can race that scroll.
+            if (
+                [
+                    'ArrowUp',
+                    'ArrowDown',
+                    'PageUp',
+                    'PageDown',
+                    'Home',
+                    'End',
+                    ' ',
+                    'Escape',
+                ].includes(event.key)
+            ) {
+                cancel();
+            }
+        },
+        { signal: controller.signal },
+    );
+    if (Reflect.has(paper, 'onscrollend')) {
+        paper.addEventListener(
+            'scrollend',
+            () => {
+                // Ignore a queued completion from the scroll that this request replaced.
+                if (Math.abs(paper.scrollTop - endTop) < 1) finish();
+            },
+            { signal: controller.signal },
+        );
+    } else {
+        // Older browsers lack scrollend; release listeners once scrolling settles.
+        paper.addEventListener(
+            'scroll',
+            () => {
+                window.clearTimeout(scrollEndTimer);
+                scrollEndTimer = window.setTimeout(finish, 150);
+            },
+            options,
+        );
+    }
+    paper.scrollTo({ top: endTop, behavior: 'smooth' });
 }
 
 function getMotionDuration(property: string, fallback: number) {
@@ -423,21 +428,30 @@ function getMotionDuration(property: string, fallback: number) {
 }
 
 function animateCloseTabExit(closeTab: HTMLAnchorElement) {
+    finishCloseTabExit?.();
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const stage = closeTab.closest<HTMLElement>('.tab-close-stage');
     const parent = stage?.parentElement;
     const nextSibling = stage?.nextSibling;
     if (!stage || !parent || stage.classList.contains('tab-close-exit-stage')) return;
 
+    if (stage.contains(document.activeElement)) closeTab.blur();
+    stage.inert = true;
+    stage.removeAttribute('data-close-focus');
     stage.classList.replace('tab-close-stage', 'tab-close-exit-stage');
     stage.setAttribute('aria-hidden', 'true');
     stage.setAttribute('data-close-exiting', '');
-    document.documentElement.append(stage);
+    document.body.append(stage);
 
     const finish = () => {
+        window.clearTimeout(timer);
+        finishCloseTabExit = null;
         if (parent.isConnected && document.body.dataset.pageKind === 'case-study') {
             stage.classList.replace('tab-close-exit-stage', 'tab-close-stage');
             stage.removeAttribute('aria-hidden');
             stage.removeAttribute('data-close-exiting');
+            stage.inert = false;
             parent.insertBefore(
                 stage,
                 nextSibling && nextSibling.parentNode === parent ? nextSibling : null,
@@ -448,13 +462,9 @@ function animateCloseTabExit(closeTab: HTMLAnchorElement) {
         stage.remove();
     };
 
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        finish();
-        return;
-    }
-
     const duration = getMotionDuration('--motion-case-study-tab-duration', 800);
-    window.setTimeout(finish, Math.max(0, duration));
+    const timer = window.setTimeout(finish, Math.max(0, duration));
+    finishCloseTabExit = finish;
 }
 
 function animateCaseStudyExitForNavigation() {
@@ -472,6 +482,7 @@ function scrollToContact(link: HTMLAnchorElement, event: MouseEvent) {
     if (!contact || !paper) return;
 
     event.preventDefault();
+    contact.focus({ preventScroll: true });
     animatePaperScroll(getElementScrollTop(contact, paper));
 }
 
@@ -620,6 +631,8 @@ function updateCloseTabFocus(event: FocusEvent, isFocused: boolean) {
 }
 
 function initializeSiteNavigation() {
+    // A rapid return must not leave the previous exit artwork beside the new tab.
+    if (getPageKind() === 'case-study') finishCloseTabExit?.();
     synchronizePageMotionState();
     normalizeContactHash();
     configureCloseTab();
@@ -640,7 +653,24 @@ document.addEventListener('animationend', (event) => {
         event.target.setAttribute('data-page-entry-complete', '');
     }
 });
-document.addEventListener('focusin', (event) => updateCloseTabFocus(event, true));
+document.addEventListener('focusin', (event) => {
+    updateCloseTabFocus(event, true);
+    if (!(event.target instanceof HTMLElement)) return;
+
+    // Reveal every animated ancestor of the focused control, and keep it revealed
+    // after focus moves away. Non-focused content retains its normal entry sequence.
+    const revealedElements: HTMLElement[] = [];
+    for (let element: HTMLElement | null = event.target; element; element = element.parentElement) {
+        if (
+            getComputedStyle(element)
+                .animationName.split(',')
+                .some((name) => name.trim() === 'page-entry-reveal')
+        ) {
+            revealedElements.push(element);
+        }
+    }
+    for (const element of revealedElements) element.setAttribute('data-page-entry-revealed', '');
+});
 document.addEventListener('focusout', (event) => updateCloseTabFocus(event, false));
 document.addEventListener('auxclick', prepareAlternateNavigation, true);
 document.addEventListener('contextmenu', prepareAlternateNavigation, true);
@@ -660,6 +690,7 @@ window.addEventListener('pageshow', (event) => {
     }
 });
 window.addEventListener('pagehide', () => {
+    finishCloseTabExit?.();
     saveReloadPosition();
     savePaperPosition();
     disconnectPaperPositionTracking();
