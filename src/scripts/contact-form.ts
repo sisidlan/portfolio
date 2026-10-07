@@ -1,4 +1,4 @@
-import { getGridSize, getRootFontSize } from './paper-grid';
+import { getGridSize } from './paper-grid';
 import { getContactToken, previewContactWidget } from './contact-turnstile';
 
 // ============================================================================
@@ -53,9 +53,6 @@ function updateField(field: HTMLElement, showError: boolean) {
     const error = field.querySelector<HTMLElement>('[data-contact-error]')!;
     const message = getValidationMessage(control);
     const hasVisibleError = showError && message !== '';
-    const isFilled = control.value.trim() !== '';
-
-    field.toggleAttribute('data-filled', isFilled);
     field.toggleAttribute('data-invalid', hasVisibleError);
     control.setAttribute('aria-invalid', String(hasVisibleError));
     error.textContent = hasVisibleError ? message : '';
@@ -114,30 +111,6 @@ function alignContactFormToGrid(form: HTMLFormElement) {
     const paper = reader.closest<HTMLElement>('.paper');
     const scrolling = paper && reader.getBoundingClientRect().height > paper.clientHeight + 0.5;
     content.style.setProperty('--contact-grid-reserve', scrolling ? offset : '0px');
-}
-
-function alignContactDividerToGrid(form: HTMLFormElement) {
-    const content = form.closest<HTMLElement>('.contact-section__content');
-    const reader = form.closest<HTMLElement>('.reader');
-    if (!content || !reader) return;
-
-    const rootStyles = getComputedStyle(document.documentElement);
-    const offsetValue = rootStyles.getPropertyValue('--contact-divider-offset').trim();
-    const offset = offsetValue.endsWith('rem')
-        ? Number.parseFloat(offsetValue) * getRootFontSize()
-        : Number.parseFloat(offsetValue);
-    if (!Number.isFinite(offset)) return;
-
-    // Anchor the divider to the already aligned form instead of the section
-    // wrapper. The wrapper can contain fractional spacing, while the form's
-    // top edge is the stable two-grid-row reference point.
-    const formTop = form.getBoundingClientRect().top;
-    const contentTop = content.getBoundingClientRect().top;
-    const targetTop = formTop - offset;
-    const unadjustedTop = contentTop - offset;
-    const adjustment = targetTop - unadjustedTop;
-
-    content.style.setProperty('--contact-divider-grid-adjustment', `${adjustment}px`);
 }
 
 function connectContactForm(form: HTMLFormElement) {
@@ -206,11 +179,6 @@ function connectContactForm(form: HTMLFormElement) {
         cancel.disabled = verifying || state === 'sending';
         cancel.setAttribute('aria-disabled', String(cancel.disabled));
         submit.hidden = verifying || state === 'success' || state === 'error';
-        // The action slot reserves its own dimensions across all states.
-        for (const button of [cancel, submit]) {
-            button.inert = verifying;
-            button.setAttribute('aria-hidden', String(verifying));
-        }
         if (verification) verification.hidden = !verifying;
         success.hidden = state !== 'success';
         deliveryError.hidden = state !== 'error';
@@ -258,7 +226,6 @@ function connectContactForm(form: HTMLFormElement) {
                 field,
                 field.hasAttribute('data-invalid') && getControl(field).value.trim() !== '',
             );
-            field.toggleAttribute('data-focused', document.activeElement === getControl(field));
         });
         render(state);
     };
@@ -298,8 +265,6 @@ function connectContactForm(form: HTMLFormElement) {
         }
         const body = reviewedBody;
         if (!body) return;
-        render('sending');
-        status.textContent = 'Sending your message.';
         const currentRequest = new AbortController();
         request = currentRequest;
         let timeout: number | undefined;
@@ -368,14 +333,12 @@ function connectContactForm(form: HTMLFormElement) {
             'focus',
             () => {
                 lastEdited = control;
-                field.setAttribute('data-focused', '');
             },
             options,
         );
         control.addEventListener(
             'blur',
             () => {
-                field.removeAttribute('data-focused');
                 updateField(field, state === 'editing' && control.value.trim() !== '');
                 updateSubmitState(form);
             },
@@ -494,7 +457,6 @@ function disconnectContactForms() {
 function connectContactForms() {
     document.querySelectorAll<HTMLFormElement>(FORM_SELECTOR).forEach((form) => {
         connectContactForm(form);
-        alignContactDividerToGrid(form);
     });
     scheduleContactAlignment();
 }
@@ -507,7 +469,6 @@ function scheduleContactAlignment() {
         alignmentFrame = undefined;
         document.querySelectorAll<HTMLFormElement>(FORM_SELECTOR).forEach((form) => {
             alignContactFormToGrid(form);
-            alignContactDividerToGrid(form);
         });
     });
 }

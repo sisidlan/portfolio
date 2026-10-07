@@ -244,7 +244,7 @@ for (const failure of ['unavailable', 'server', 'network']) {
         await primary.click();
         const error = form.getByRole('alert');
         await expect(error).toBeVisible();
-        await expect(error).toHaveText('Unable to send message, try again later');
+        await expect(error).toHaveText('Unable to send message');
         await expect(error).toHaveCSS('color', 'rgb(188, 39, 32)');
         await expect(error).toHaveCSS('font-size', '20px');
         await expect(error).toHaveCSS('text-transform', 'uppercase');

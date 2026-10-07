@@ -72,9 +72,7 @@ test('a failed Turnstile challenge preserves the draft and never calls the deliv
     await expect(error.locator('svg')).toBeVisible();
     await expect(error.locator('svg')).toHaveCSS('width', '32px');
     await expect(error.locator('svg')).toHaveCSS('color', 'rgb(188, 39, 32)');
-    await expect(error.locator('[data-contact-error-text]')).toHaveText(
-        'Unable to send message, try again later',
-    );
+    await expect(error.locator('[data-contact-error-text]')).toHaveText('Unable to send message');
     await expect(form.locator('#contact-message')).toHaveValue('Keep this draft');
     await expect(form.locator('#contact-message')).toBeEditable();
     expect(submissions).toBe(0);

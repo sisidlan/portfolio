@@ -7,9 +7,18 @@ async function alignmentError(page: Page) {
         const size = styles.getPropertyValue('--grid-size');
         const grid =
             parseFloat(size) * (size.trim().endsWith('rem') ? parseFloat(styles.fontSize) : 1);
+        const content = document.querySelector('.contact-section__content')!;
+        const dividerTop =
+            content.getBoundingClientRect().top +
+            parseFloat(getComputedStyle(content, '::before').top);
         return Math.max(
-            ...[...document.querySelectorAll('[data-contact-field]')].map((field) => {
-                const position = field.getBoundingClientRect().bottom - readerTop;
+            ...[
+                dividerTop,
+                ...[...document.querySelectorAll('[data-contact-field]')].map(
+                    (field) => field.getBoundingClientRect().bottom,
+                ),
+            ].map((edge) => {
+                const position = edge - readerTop;
                 const remainder = ((position % grid) + grid) % grid;
                 return Math.min(remainder, grid - remainder);
             }),
@@ -18,7 +27,7 @@ async function alignmentError(page: Page) {
 }
 
 for (const width of [1600, 1376, 800, 390, 340]) {
-    test(`contact field borders stay on the paper grid after load and layout changes at ${width}px`, async ({
+    test(`contact fields and divider stay on the paper grid after load and layout changes at ${width}px`, async ({
         page,
     }) => {
         await page.setViewportSize({ width, height: 1000 });

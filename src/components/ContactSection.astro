@@ -214,25 +214,22 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
         position: relative;
         container: contact-layout / inline-size;
         --contact-grid-offset: 0rem;
-    }
-
-    .contact-section__content::before {
-        content: '';
-        position: absolute;
-        top: calc(-1 * var(--contact-divider-offset) + var(--contact-divider-grid-adjustment));
-        inset-inline: calc(var(--page-gutter) - var(--content-divider-extension));
-        height: var(--content-divider-thickness);
-        border-radius: var(--content-divider-radius);
-        background-color: var(--content-divider-color);
-        pointer-events: none;
-    }
-
-    .contact-section__content {
         width: 100%;
         max-width: var(--page-max-width);
         margin: 0 auto;
         padding-inline: var(--page-gutter);
         padding-bottom: var(--contact-grid-reserve, 0px);
+    }
+
+    .contact-section__content::before {
+        content: '';
+        position: absolute;
+        top: calc(var(--contact-grid-offset) - var(--contact-divider-offset));
+        inset-inline: calc(var(--page-gutter) - var(--content-divider-extension));
+        height: var(--content-divider-thickness);
+        border-radius: var(--content-divider-radius);
+        background-color: var(--content-divider-color);
+        pointer-events: none;
     }
 
     .contact-form {
@@ -340,40 +337,17 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
         resize: none;
     }
 
-    .contact-form__field[data-focused],
-    .contact-form__field[data-filled] {
+    .contact-form__field:focus-within,
+    .contact-form__field:not([data-invalid]):has(.contact-form__control:not(:placeholder-shown)) {
         color: var(--gray-ink-color);
     }
 
-    @supports selector(:focus-within) {
-        .contact-form__field:focus-within {
-            color: var(--gray-ink-color);
-        }
-    }
-
-    .contact-form__field[data-filled] .contact-form__label {
+    .contact-form__field:has(.contact-form__control:not(:placeholder-shown)) .contact-form__label {
         top: var(--contact-field-label-offset-top);
         height: var(--contact-field-label-height);
         color: var(--gray-ink-color);
         font-size: var(--caption-size);
         font-weight: 800;
-    }
-
-    @supports selector(:has(*)) {
-        .contact-form__field:not([data-invalid]):has(
-                .contact-form__control:not(:placeholder-shown)
-            ) {
-            color: var(--gray-ink-color);
-        }
-
-        .contact-form__field:has(.contact-form__control:not(:placeholder-shown))
-            .contact-form__label {
-            top: var(--contact-field-label-offset-top);
-            height: var(--contact-field-label-height);
-            color: var(--gray-ink-color);
-            font-size: var(--caption-size);
-            font-weight: 800;
-        }
     }
 
     .contact-form__field[data-invalid] {
@@ -386,21 +360,12 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
         transition: none;
     }
 
-    .contact-form__field[data-invalid][data-filled] .contact-form__label {
+    .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
+        .contact-form__label {
         color: var(--alert-color);
         transition:
             font-size 160ms ease,
             top 160ms ease;
-    }
-
-    @supports selector(:has(*)) {
-        .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
-            .contact-form__label {
-            color: var(--alert-color);
-            transition:
-                font-size 160ms ease,
-                top 160ms ease;
-        }
     }
 
     .contact-form__error {
@@ -658,15 +623,9 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
     @media (prefers-reduced-motion: reduce) {
         .contact-form__field::before,
         .contact-form__label,
-        .contact-form__field[data-invalid][data-filled] .contact-form__label {
+        .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
+            .contact-form__label {
             transition-duration: 0.01ms;
-        }
-
-        @supports selector(:has(*)) {
-            .contact-form__field[data-invalid]:has(.contact-form__control:not(:placeholder-shown))
-                .contact-form__label {
-                transition-duration: 0.01ms;
-            }
         }
 
         .contact-form__submit-hint--wiggle {
