@@ -1,5 +1,5 @@
 import { getGridSize, getRootFontSize } from './paper-grid';
-import { getContactToken } from './contact-turnstile';
+import { getContactToken, previewContactWidget } from './contact-turnstile';
 
 // ============================================================================
 // Form selectors and validation helpers
@@ -8,6 +8,7 @@ const FORM_SELECTOR = '[data-contact-form]';
 const FIELD_SELECTOR = '[data-contact-field]';
 const CONTROL_SELECTOR = 'input, textarea';
 const SUBMIT_SELECTOR = '[data-contact-submit]';
+const DELIVERY_ERROR_MESSAGE = 'Unable to send message';
 
 type ContactControl = HTMLInputElement | HTMLTextAreaElement;
 type ContactState = 'editing' | 'confirming' | 'verifying' | 'sending' | 'success' | 'error';
@@ -159,8 +160,17 @@ function connectContactForm(form: HTMLFormElement) {
     const deliveryErrorText = deliveryError.querySelector<HTMLElement>(
         '[data-contact-error-text]',
     )!;
-    const verification = form.querySelector<HTMLElement>('[data-contact-turnstile]');
+    const verification = form.querySelector<HTMLElement>('[data-contact-verification]');
     const hint = form.querySelector<HTMLElement>('[data-contact-submit-hint]')!;
+    // Persistent visual previews exist only in Astro dev. The production build
+    // removes this branch, and preview states never enter the delivery flow.
+    const previewValue = import.meta.env.DEV
+        ? new URL(window.location.href).searchParams.get('contact-preview')
+        : null;
+    const previewState =
+        previewValue === 'success' || previewValue === 'error' || previewValue === 'verifying'
+            ? previewValue
+            : null;
     let state: ContactState = 'editing';
     let lastEdited = controls[0];
     let readyAt = 0;
@@ -183,7 +193,7 @@ function connectContactForm(form: HTMLFormElement) {
     const render = (nextState: ContactState) => {
         window.clearTimeout(confirmTimer);
         confirmTimer = undefined;
-        state = nextState;
+        state = previewState ?? nextState;
         form.dataset.contactState = state;
         const remaining = state === 'confirming' ? Math.max(0, readyAt - performance.now()) : 0;
         const seconds = Math.ceil(remaining / 1000);
@@ -192,11 +202,11 @@ function connectContactForm(form: HTMLFormElement) {
         controls.forEach((control) => {
             control.readOnly = locked;
         });
-        cancel.hidden = !locked;
+        cancel.hidden = !locked || verifying;
         cancel.disabled = verifying || state === 'sending';
         cancel.setAttribute('aria-disabled', String(cancel.disabled));
-        submit.hidden = state === 'success' || state === 'error';
-        // Keep the buttons' layout boxes while verification occupies their slot.
+        submit.hidden = verifying || state === 'success' || state === 'error';
+        // The action slot reserves its own dimensions across all states.
         for (const button of [cancel, submit]) {
             button.inert = verifying;
             button.setAttribute('aria-hidden', String(verifying));
@@ -204,6 +214,7 @@ function connectContactForm(form: HTMLFormElement) {
         if (verification) verification.hidden = !verifying;
         success.hidden = state !== 'success';
         deliveryError.hidden = state !== 'error';
+        if (state === 'error') deliveryErrorText.textContent = DELIVERY_ERROR_MESSAGE;
         const text =
             state === 'editing' || state === 'success' || state === 'error'
                 ? 'Send'
@@ -270,7 +281,6 @@ function connectContactForm(form: HTMLFormElement) {
             .contains(document.activeElement);
         edit();
         render('error');
-        deliveryErrorText.textContent = 'Unable to send message, try again later';
         if (shouldMoveFocus) form.closest<HTMLElement>('#contact')?.focus({ preventScroll: true });
         feedbackTimer = window.setTimeout(
             () => {
@@ -424,6 +434,7 @@ function connectContactForm(form: HTMLFormElement) {
         'submit',
         (event) => {
             event.preventDefault();
+            if (previewState) return;
             if (state === 'editing') {
                 if (updateSubmitState(form)) review();
                 else replaySubmitHintAnimation(form);
@@ -452,8 +463,25 @@ function connectContactForm(form: HTMLFormElement) {
             delete form.dataset.contactFormReady;
         },
     });
+    if (previewState === 'error' || previewState === 'verifying') {
+        const sample = {
+            name: 'Sample visitor',
+            email: 'visitor@example.com',
+            message: 'A sample message to preview the contact footer.',
+        };
+        controls.forEach((control) => {
+            control.value = sample[control.name as keyof typeof sample];
+        });
+    }
     refresh();
     alignContactFormToGrid(form);
+    if (import.meta.env.DEV && previewState === 'verifying') {
+        void previewContactWidget(form, lifecycle.signal).catch(() => {
+            if (!lifecycle.signal.aborted) {
+                status.textContent = 'The preview widget could not load. Reload to try again.';
+            }
+        });
+    }
 }
 
 function disconnectContactForms() {

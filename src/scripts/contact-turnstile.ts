@@ -5,8 +5,9 @@ type Turnstile = {
             sitekey: string;
             action: string;
             execution: 'execute';
-            appearance: 'interaction-only';
-            size: 'normal' | 'compact';
+            appearance: 'execute';
+            theme: 'light';
+            size: 'flexible' | 'compact';
             'response-field': false;
             callback: (token: string) => void;
             'error-callback': () => void;
@@ -55,6 +56,49 @@ function loadTurnstile() {
     return loading;
 }
 
+function widgetOptions(form: HTMLFormElement) {
+    return {
+        action: 'contact',
+        execution: 'execute',
+        appearance: 'execute',
+        theme: 'light',
+        size:
+            form.querySelector<HTMLElement>('.contact-form__end')!.getBoundingClientRect().width <
+            300
+                ? 'compact'
+                : 'flexible',
+        'response-field': false,
+    } as const;
+}
+
+// A dev-only visual fixture: ignore tokens and keep the widget mounted until
+// navigation. It never enters the real verification or email-delivery flow.
+export async function previewContactWidget(form: HTMLFormElement, signal: AbortSignal) {
+    if (!import.meta.env.DEV) return;
+    const container = form.querySelector<HTMLElement>('[data-contact-turnstile]');
+    if (!container) throw new Error('Security verification is unavailable.');
+    const turnstile = await loadTurnstile();
+    signal.throwIfAborted();
+    const ignore = () => {};
+    const widget = turnstile.render(container, {
+        ...widgetOptions(form),
+        sitekey: '3x00000000000000000000FF',
+        callback: ignore,
+        'error-callback': ignore,
+        'expired-callback': ignore,
+        'timeout-callback': ignore,
+    });
+    const remove = () => turnstile.remove(widget);
+    signal.addEventListener('abort', remove, { once: true });
+    try {
+        turnstile.execute(widget);
+    } catch (error) {
+        signal.removeEventListener('abort', remove);
+        remove();
+        throw error;
+    }
+}
+
 export async function getContactToken(form: HTMLFormElement, signal: AbortSignal) {
     const sitekey = form.dataset.turnstileSiteId;
     if (!sitekey) return null;
@@ -91,16 +135,8 @@ export async function getContactToken(form: HTMLFormElement, signal: AbortSignal
         signal.addEventListener('abort', aborted, { once: true });
         try {
             widget = turnstile.render(container, {
+                ...widgetOptions(form),
                 sitekey,
-                action: 'contact',
-                execution: 'execute',
-                appearance: 'interaction-only',
-                size:
-                    form.querySelector<HTMLElement>('.contact-form__end')!.getBoundingClientRect()
-                        .width < 300
-                        ? 'compact'
-                        : 'normal',
-                'response-field': false,
                 callback: (token) => {
                     if (settled) return;
                     settled = true;

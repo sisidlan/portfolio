@@ -147,7 +147,7 @@ for (const width of [1600, 800, 390, 340]) {
                 render: (element, options) => {
                     container = element;
                     const widget = document.createElement('div');
-                    widget.style.cssText = `width:${options.size === 'normal' ? 300 : 150}px;height:${options.size === 'normal' ? 65 : 140}px;background:#fafafa;border:1px solid #ccc`;
+                    widget.style.cssText = `width:${options.size === 'flexible' ? '100%' : '150px'};min-width:${options.size === 'flexible' ? '300px' : '150px'};height:${options.size === 'flexible' ? 65 : 140}px;background:#fafafa;border:1px solid #ccc`;
                     widget.textContent = 'Verification fixture';
                     element.append(widget);
                     element.dataset.testWidgetSize = options.size;
@@ -185,17 +185,22 @@ for (const width of [1600, 800, 390, 340]) {
         await expect(form).toHaveAttribute('data-contact-state', 'verifying');
         await expect(form.locator('[data-contact-submit]')).toBeHidden();
         await expect(form.locator('[data-contact-cancel]')).toBeHidden();
-        const verification = form.locator('[data-contact-turnstile]');
+        const verification = form.locator('[data-contact-verification]');
+        const mount = form.locator('[data-contact-turnstile]');
         await expect(verification).toBeVisible();
         const compact = await form
             .locator('.contact-form__end')
             .evaluate((element) => element.getBoundingClientRect().width < 300);
-        await expect(verification).toHaveAttribute(
+        await expect(mount).toHaveAttribute(
             'data-test-widget-size',
-            compact ? 'compact' : 'normal',
+            compact ? 'compact' : 'flexible',
         );
         expect(await geometry()).toEqual(before);
         const widget = (await verification.boundingBox())!;
+        const actions = (await form.locator('.contact-form__actions').boundingBox())!;
+        expect(widget.y + widget.height / 2).toBeCloseTo(actions.y + actions.height / 2, 1);
+        await expect(form.locator('[data-contact-submit]')).toHaveAttribute('hidden', '');
+        await expect(form.locator('[data-contact-cancel]')).toHaveAttribute('hidden', '');
         const details = (await form.locator('.contact-section__details').boundingBox())!;
         expect(widget.y).toBeGreaterThanOrEqual(details.y + details.height);
         await form.screenshot({ path: testInfo.outputPath('contact-verification.png') });

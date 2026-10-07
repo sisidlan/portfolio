@@ -25,8 +25,12 @@ out of `PUBLIC_` variables, source files, logs, and screenshots. Vercel's Config
 and Secret labels control dashboard visibility, not browser exposure.
 
 The form needs JavaScript for Turnstile. After confirmation, verification replaces
-the buttons in their reserved action area. It uses the horizontal widget unless
-the column is narrower than 300px, where space is reserved for the compact widget.
+the buttons in their reserved action area. It uses a light horizontal widget that
+fills the combined button-row width. The footer stacks its columns when they
+cannot accommodate that widget. On screens where the full form is narrower than
+300px, space is reserved for the compact widget. A separate outer frame controls
+position and visibility; Cloudflare renders inside it. Verification is visible
+while executing, including when no checkbox interaction is needed.
 Each attempt gets a fresh token.
 The backend refuses missing configuration, invalid inputs, missing/expired/reused
 tokens, unexpected origins/hostnames, and tokens whose action is not `contact`.
@@ -95,6 +99,25 @@ attempted but rejected or its response was unavailable. Never log request bodies
 tokens, authorization headers, private environment values, or raw provider errors.
 
 ## Validation
+
+For visual editing without sending email, start the local server with
+`npm run dev -- --background` and open:
+
+- `http://localhost:4321/?contact-preview=success`
+- `http://localhost:4321/?contact-preview=error`
+- `http://localhost:4321/?contact-preview=verifying`
+
+Scroll to the contact footer. The selected state stays visible while you edit
+styles; the error and verification previews include a sample draft. The verification
+preview displays the real Cloudflare widget using its public interactive test key,
+in the same action slot as production. The widget remains mounted even after
+verification completes, and its token is ignored. Cloudflare displays a test-only
+notice on this widget. No environment-variable changes are needed.
+These URLs work on other pages
+too, for example `/work/?contact-preview=error`. Remove the query parameter to
+return to the normal form. None of these previews call the delivery endpoint;
+only the verification preview loads Turnstile. Astro removes the preview activation
+code and test key from production builds.
 
 `npm run check`, `npm run format:check`, and `npm test` check types, formatting,
 the existing website interactions, the Turnstile confirmation flow, and backend

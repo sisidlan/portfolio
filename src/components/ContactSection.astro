@@ -124,7 +124,9 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
                 </noscript>
 
                 <div class="contact-form__actions">
-                    <div class="contact-form__verification" data-contact-turnstile hidden />
+                    <div class="contact-form__verification" data-contact-verification hidden>
+                        <div data-contact-turnstile />
+                    </div>
                     <button
                         type="button"
                         class="button button-secondary"
@@ -210,6 +212,7 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
 
     .contact-section__content {
         position: relative;
+        container: contact-layout / inline-size;
         --contact-grid-offset: 0rem;
     }
 
@@ -428,6 +431,7 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
         display: flex;
         flex-direction: column;
         align-items: flex-end;
+        gap: var(--grid-size);
     }
 
     .contact-section__details {
@@ -486,13 +490,23 @@ const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
         inset-inline-end: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 300px;
+        width: min(100%, calc(2 * var(--button-width) + var(--contact-action-gap)));
         height: 65px;
     }
 
-    .contact-form[data-contact-state='verifying']
-        :is([data-contact-cancel], [data-contact-submit]) {
-        visibility: hidden;
+    .contact-form__verification > div {
+        /* Avoid baseline space beneath Cloudflare's inline iframe host. */
+        line-height: 0;
+    }
+
+    @container contact-layout (width < 39.5rem) {
+        .contact-form {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-form__end {
+            min-height: var(--contact-mobile-form-min-height);
+        }
     }
 
     @container (width < 26.375rem) {
