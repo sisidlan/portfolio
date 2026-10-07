@@ -1,4 +1,5 @@
 import { getGridSize, getRootFontSize } from './paper-grid';
+import { getContactToken } from './contact-turnstile';
 
 // ============================================================================
 // Form selectors and validation helpers
@@ -37,6 +38,10 @@ function getValidationMessage(control: ContactControl) {
         control.validity.typeMismatch
     ) {
         return 'Enter a valid email';
+    }
+
+    if (control.maxLength > 0 && control.value.length > control.maxLength) {
+        return `Use ${control.maxLength} characters or fewer`;
     }
 
     return '';
@@ -282,9 +287,18 @@ function connectContactForm(form: HTMLFormElement) {
         status.textContent = 'Sending your message.';
         const currentRequest = new AbortController();
         request = currentRequest;
-        const timeout = window.setTimeout(() => currentRequest.abort(), 15_000);
-        requestTimer = timeout;
+        let timeout: number | undefined;
         try {
+            if (form.dataset.turnstileSiteId) {
+                status.textContent = 'Completing security verification.';
+                const token = await getContactToken(form, currentRequest.signal);
+                if (!token) throw new Error('Security verification is unavailable');
+                body.set('cf-turnstile-response', token);
+            }
+            if (request !== currentRequest || lifecycle.signal.aborted) return;
+            status.textContent = 'Sending your message.';
+            timeout = window.setTimeout(() => currentRequest.abort(), 15_000);
+            requestTimer = timeout;
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { Accept: 'application/json' },

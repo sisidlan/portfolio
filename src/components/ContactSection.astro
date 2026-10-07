@@ -7,6 +7,7 @@ import PrimarySubmit from './PrimarySubmit.astro';
 import ButtonArtwork from './ButtonArtwork.astro';
 
 const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
+const turnstileSiteId = import.meta.env.PUBLIC_TURNSTILE_SITE_ID?.trim();
 ---
 
 <section id="contact" class="contact-section" aria-labelledby="contact-heading" tabindex="-1">
@@ -14,6 +15,7 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
         <form
             class="contact-form"
             data-contact-form
+            data-turnstile-site-id={turnstileSiteId || undefined}
             data-astro-reload
             action={endpoint || undefined}
             method="post"
@@ -38,6 +40,7 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
                             placeholder=" "
                             aria-describedby="contact-name-error"
                             required
+                            maxlength="100"
                         />
                         <p
                             class="contact-form__error"
@@ -61,6 +64,7 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
                             placeholder=" "
                             aria-describedby="contact-email-error"
                             required
+                            maxlength="254"
                         />
                         <p
                             class="contact-form__error"
@@ -86,6 +90,7 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
                             placeholder=" "
                             aria-describedby="contact-message-error"
                             required
+                            maxlength="5000"
                         ></textarea>
                         <p
                             class="contact-form__error"
@@ -111,6 +116,16 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
                         </div>
                     </div>
                 </aside>
+
+                {turnstileSiteId && (
+                    <div class="contact-form__verification" data-contact-turnstile />
+                )}
+
+                <noscript>
+                    <p class="contact-form__verification-note">
+                        Enable JavaScript to complete security verification and send a message.
+                    </p>
+                </noscript>
 
                 <div class="contact-form__actions">
                     <button
@@ -448,6 +463,17 @@ const endpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
         min-height: var(--button-height);
         margin-top: auto;
         margin-bottom: var(--contact-submit-bottom-offset);
+    }
+
+    .contact-form__verification {
+        max-width: 100%;
+        margin-block: var(--contact-caption-gap);
+    }
+
+    .contact-form__verification-note {
+        color: var(--gray-ink-color);
+        font-size: var(--caption-size);
+        text-align: right;
     }
 
     .contact-form__actions > [hidden] {
