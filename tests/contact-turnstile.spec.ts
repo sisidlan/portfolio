@@ -27,9 +27,6 @@ async function setup(page: Page, fail = false) {
     await form.evaluate((element: HTMLFormElement) => {
         element.action = '/contact-test/';
         element.dataset.turnstileSiteId = 'public-widget-id';
-        const container = document.createElement('div');
-        container.dataset.contactTurnstile = '';
-        element.append(container);
         document.documentElement.style.setProperty('--contact-confirm-delay', '0ms');
     });
     return form;
@@ -71,6 +68,13 @@ test('a failed Turnstile challenge preserves the draft and never calls the deliv
     await form.getByRole('button', { name: 'Send', exact: true }).click();
     await form.getByRole('button', { name: 'Confirm', exact: true }).click();
     await expect(form).toHaveAttribute('data-contact-state', 'error');
+    const error = form.locator('[data-contact-delivery-error]');
+    await expect(error.locator('svg')).toBeVisible();
+    await expect(error.locator('svg')).toHaveCSS('width', '32px');
+    await expect(error.locator('svg')).toHaveCSS('color', 'rgb(188, 39, 32)');
+    await expect(error.locator('[data-contact-error-text]')).toHaveText(
+        'Unable to send message, try again later',
+    );
     await expect(form.locator('#contact-message')).toHaveValue('Keep this draft');
     await expect(form.locator('#contact-message')).toBeEditable();
     expect(submissions).toBe(0);
@@ -97,7 +101,7 @@ test('navigation cancels a pending challenge and removes its widget without subm
     await form.locator('#contact-message').fill('Pending draft');
     await form.getByRole('button', { name: 'Send', exact: true }).click();
     await form.getByRole('button', { name: 'Confirm', exact: true }).click();
-    await expect(form).toHaveAttribute('data-contact-state', 'sending');
+    await expect(form).toHaveAttribute('data-contact-state', 'verifying');
     await page.getByRole('link', { name: 'About', exact: true }).click();
     await expect(page).toHaveURL('/about/');
     await expect
@@ -127,3 +131,77 @@ test('failure to load Cloudflare preserves the draft and prevents delivery', asy
     await expect(form.locator('#contact-message')).toHaveValue('Keep this draft');
     expect(submissions).toBe(0);
 });
+
+for (const width of [1600, 800, 390, 340]) {
+    test(`verification replaces the actions without moving the footer at ${width}px`, async ({
+        page,
+    }, testInfo) => {
+        await page.setViewportSize({ width, height: 1000 });
+        await page.route('**/contact-test/', (route) =>
+            route.fulfill({ contentType: 'application/json', body: '{"ok":true}' }),
+        );
+        const form = await setup(page);
+        await page.evaluate(() => {
+            let container: HTMLElement;
+            window.turnstile = {
+                render: (element, options) => {
+                    container = element;
+                    const widget = document.createElement('div');
+                    widget.style.cssText = `width:${options.size === 'normal' ? 300 : 150}px;height:${options.size === 'normal' ? 65 : 140}px;background:#fafafa;border:1px solid #ccc`;
+                    widget.textContent = 'Verification fixture';
+                    element.append(widget);
+                    element.dataset.testWidgetSize = options.size;
+                    document.addEventListener(
+                        'test:verified',
+                        () => options.callback('verified-token'),
+                        { once: true },
+                    );
+                    return 'layout-widget';
+                },
+                execute: () => {},
+                remove: () => container.replaceChildren(),
+            };
+        });
+        await form.locator('#contact-name').fill('Visitor');
+        await form.locator('#contact-email').fill('visitor@example.com');
+        await form.locator('#contact-message').fill('Layout test');
+        await form.getByRole('button', { name: 'Send', exact: true }).click();
+        const geometry = () =>
+            form.evaluate((element) => {
+                const readerTop = element.closest('.reader')!.getBoundingClientRect().top;
+                return [
+                    '[data-contact-field]',
+                    '.contact-section__details',
+                    '.site-footer',
+                ].flatMap((selector) =>
+                    [...document.querySelectorAll(selector)].map((node) => {
+                        const rect = node.getBoundingClientRect();
+                        return [rect.top - readerTop, rect.height];
+                    }),
+                );
+            });
+        const before = await geometry();
+        await form.getByRole('button', { name: 'Confirm', exact: true }).click();
+        await expect(form).toHaveAttribute('data-contact-state', 'verifying');
+        await expect(form.locator('[data-contact-submit]')).toBeHidden();
+        await expect(form.locator('[data-contact-cancel]')).toBeHidden();
+        const verification = form.locator('[data-contact-turnstile]');
+        await expect(verification).toBeVisible();
+        const compact = await form
+            .locator('.contact-form__end')
+            .evaluate((element) => element.getBoundingClientRect().width < 300);
+        await expect(verification).toHaveAttribute(
+            'data-test-widget-size',
+            compact ? 'compact' : 'normal',
+        );
+        expect(await geometry()).toEqual(before);
+        const widget = (await verification.boundingBox())!;
+        const details = (await form.locator('.contact-section__details').boundingBox())!;
+        expect(widget.y).toBeGreaterThanOrEqual(details.y + details.height);
+        await form.screenshot({ path: testInfo.outputPath('contact-verification.png') });
+        await page.evaluate(() => document.dispatchEvent(new Event('test:verified')));
+        await expect(form).toHaveAttribute('data-contact-state', 'success');
+        await expect(verification).toBeHidden();
+        expect(await geometry()).toEqual(before);
+    });
+}

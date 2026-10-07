@@ -16,6 +16,11 @@ type Dependencies = {
     getConfig: () => ContactConfig;
     fetch?: typeof fetch;
     now?: () => number;
+    reportFailure?: (failure: {
+        stage: 'configuration' | 'turnstile' | 'resend';
+        reason: string;
+        status?: number;
+    }) => void;
 };
 
 class InvalidBody extends Error {}
@@ -109,6 +114,10 @@ export function createContactHandler(dependencies: Dependencies) {
             !config.to ||
             !validEmail(config.to)
         ) {
+            dependencies.reportFailure?.({
+                stage: 'configuration',
+                reason: 'missing_or_invalid_config',
+            });
             return result(503, 'Messaging is temporarily unavailable.');
         }
 
@@ -166,7 +175,14 @@ export function createContactHandler(dependencies: Dependencies) {
                     signal: AbortSignal.timeout(5000),
                 },
             );
-            if (!verification.ok) return result(503, 'Security verification is unavailable.');
+            if (!verification.ok) {
+                dependencies.reportFailure?.({
+                    stage: 'turnstile',
+                    reason: 'provider_rejected',
+                    status: verification.status,
+                });
+                return result(503, 'Security verification is unavailable.');
+            }
             const verified = (await verification.json()) as {
                 success?: boolean;
                 hostname?: string;
@@ -177,9 +193,19 @@ export function createContactHandler(dependencies: Dependencies) {
                 verified.hostname !== new URL(origin).hostname ||
                 verified.action !== 'contact'
             ) {
+                dependencies.reportFailure?.({
+                    stage: 'turnstile',
+                    reason:
+                        verified.success !== true
+                            ? 'invalid_token'
+                            : verified.hostname !== new URL(origin).hostname
+                              ? 'hostname_mismatch'
+                              : 'action_mismatch',
+                });
                 return result(403, 'Security verification failed. Please try again.');
             }
         } catch {
+            dependencies.reportFailure?.({ stage: 'turnstile', reason: 'provider_unavailable' });
             return result(503, 'Security verification is unavailable.');
         }
 
@@ -202,11 +228,25 @@ export function createContactHandler(dependencies: Dependencies) {
                 }),
                 signal: AbortSignal.timeout(7000),
             });
-            if (!response.ok) return result(502, 'Unable to send message. Please try again later.');
+            if (!response.ok) {
+                dependencies.reportFailure?.({
+                    stage: 'resend',
+                    reason: 'provider_rejected',
+                    status: response.status,
+                });
+                return result(502, 'Unable to send message. Please try again later.');
+            }
             const accepted = (await response.json()) as { id?: string };
-            if (!accepted.id) return result(502, 'Unable to send message. Please try again later.');
+            if (!accepted.id) {
+                dependencies.reportFailure?.({
+                    stage: 'resend',
+                    reason: 'invalid_provider_response',
+                });
+                return result(502, 'Unable to send message. Please try again later.');
+            }
             return result(200);
         } catch {
+            dependencies.reportFailure?.({ stage: 'resend', reason: 'provider_unavailable' });
             // Do not automatically retry: the provider may have accepted mail
             // even if the response was lost. Never log credentials or drafts.
             return result(502, 'Unable to send message. Please try again later.');

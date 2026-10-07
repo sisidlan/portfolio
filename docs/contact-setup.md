@@ -24,8 +24,10 @@ Use a Managed Turnstile widget, restricted to `kevindegraaf.com` and
 out of `PUBLIC_` variables, source files, logs, and screenshots. Vercel's Config
 and Secret labels control dashboard visibility, not browser exposure.
 
-The form needs JavaScript for Turnstile. If the widget needs a checkbox, it appears
-in the contact section after confirmation. Each attempt gets a fresh token.
+The form needs JavaScript for Turnstile. After confirmation, verification replaces
+the buttons in their reserved action area. It uses the horizontal widget unless
+the column is narrower than 300px, where space is reserved for the compact widget.
+Each attempt gets a fresh token.
 The backend refuses missing configuration, invalid inputs, missing/expired/reused
 tokens, unexpected origins/hostnames, and tokens whose action is not `contact`.
 Origin checking supplements Turnstile; a non-browser caller can forge Origin.
@@ -34,7 +36,8 @@ Messages go only to the configured recipient. The visitor's address is used only
 for Reply-To, and message content is plain text. Success means Resend accepted the
 message, not guaranteed inbox delivery. Failed or timed-out requests preserve the
 draft and are not automatically retried. Providers' internal errors and private
-credentials are never returned to visitors or logged by this handler.
+credentials are never returned to visitors or logged by this handler. Vercel logs
+contain only fixed failure stages/reasons and provider HTTP status codes.
 
 ## Before the first production deployment
 
@@ -75,6 +78,21 @@ Preview. For local UI checks, use mocked Turnstile/provider responses in the tes
 dummy keys and mocked verification must never bypass production checks.
 
 DMARC remains optional for sending and was not added as part of this setup.
+
+## Troubleshooting
+
+Opening `/api/contact/` directly should return **405**, because sending requires
+POST. A **500 FUNCTION_INVOCATION_FAILED** means the function crashed; inspect
+Vercel's runtime logs before changing Resend DNS. Node ESM imports in this native
+function must name the emitted `.js` file (for example `../src/server/contact.js`),
+even though the source file is TypeScript. The runtime regression test compiles
+and loads this entry point with native Node, separately from Astro's static build.
+
+For failed submissions, the Vercel log prefix `[contact]` identifies the stage:
+`configuration` means missing/invalid server settings, `turnstile` means security
+verification failed or was unavailable, and `resend` means email delivery was
+attempted but rejected or its response was unavailable. Never log request bodies,
+tokens, authorization headers, private environment values, or raw provider errors.
 
 ## Validation
 

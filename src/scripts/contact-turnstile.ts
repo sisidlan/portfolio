@@ -6,7 +6,7 @@ type Turnstile = {
             action: string;
             execution: 'execute';
             appearance: 'interaction-only';
-            size: 'compact';
+            size: 'normal' | 'compact';
             'response-field': false;
             callback: (token: string) => void;
             'error-callback': () => void;
@@ -95,7 +95,11 @@ export async function getContactToken(form: HTMLFormElement, signal: AbortSignal
                 action: 'contact',
                 execution: 'execute',
                 appearance: 'interaction-only',
-                size: 'compact',
+                size:
+                    form.querySelector<HTMLElement>('.contact-form__end')!.getBoundingClientRect()
+                        .width < 300
+                        ? 'compact'
+                        : 'normal',
                 'response-field': false,
                 callback: (token) => {
                     if (settled) return;

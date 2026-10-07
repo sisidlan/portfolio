@@ -26,6 +26,10 @@ test('review locks gray fields, Cancel preserves the draft, and success returns 
     });
     const form = await fillMessage(page);
     await configureEndpoint(page);
+    await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    });
     const primary = form.locator('[data-contact-submit]');
     const cancel = form.getByRole('button', { name: 'Cancel', exact: true });
     const initial = (await form.boundingBox())!;

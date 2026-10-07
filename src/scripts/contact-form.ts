@@ -10,7 +10,7 @@ const CONTROL_SELECTOR = 'input, textarea';
 const SUBMIT_SELECTOR = '[data-contact-submit]';
 
 type ContactControl = HTMLInputElement | HTMLTextAreaElement;
-type ContactState = 'editing' | 'confirming' | 'sending' | 'success' | 'error';
+type ContactState = 'editing' | 'confirming' | 'verifying' | 'sending' | 'success' | 'error';
 type ConnectedForm = { refresh: () => void; disconnect: () => void };
 const connectedForms = new Map<HTMLFormElement, ConnectedForm>();
 
@@ -92,33 +92,27 @@ function replaySubmitHintAnimation(form: HTMLFormElement) {
 function alignContactFormToGrid(form: HTMLFormElement) {
     const reader = form.closest<HTMLElement>('.reader');
     const content = form.closest<HTMLElement>('.contact-section__content');
-    if (!reader) return;
+    if (!reader || !content) return;
 
     const gridSize = getGridSize();
     const currentOffset = Number.parseFloat(
-        form.style.getPropertyValue('--contact-grid-offset') || '0',
+        content.style.getPropertyValue('--contact-grid-offset') || '0',
     );
     const baseTop =
         form.getBoundingClientRect().top - reader.getBoundingClientRect().top - currentOffset;
     const remainder = ((baseTop % gridSize) + gridSize) % gridSize;
-    const nextOffset = remainder < 0.01 ? 0 : gridSize - remainder;
+    const nextOffset = Math.min(remainder, gridSize - remainder) < 0.02 ? 0 : gridSize - remainder;
 
     // This is measured viewport geometry, so px avoids rem rounding drift.
     const offset = String(nextOffset) + 'px';
-    form.style.setProperty('--contact-grid-offset', offset);
-    content?.style.setProperty('--contact-grid-offset', offset);
-
-    // The shared offset also keeps the contact section's reserved height
-    // stable. Apply a separate visual correction so the form itself remains
-    // aligned when a page's preceding content has a different height.
-    const currentAdjustment = Number.parseFloat(
-        form.style.getPropertyValue('--contact-form-grid-adjustment') || '0',
-    );
-    const renderedTop =
-        form.getBoundingClientRect().top - reader.getBoundingClientRect().top - currentAdjustment;
-    const renderedRemainder = ((renderedTop % gridSize) + gridSize) % gridSize;
-    const formAdjustment = renderedRemainder < 0.01 ? 0 : gridSize - renderedRemainder;
-    form.style.setProperty('--contact-form-grid-adjustment', `${formAdjustment}px`);
+    if (Math.abs(currentOffset - nextOffset) > 0.02) {
+        content.style.setProperty('--contact-grid-offset', offset);
+    }
+    // Reserve the visual offset on scrolling pages. On a short page, extra
+    // padding would shrink the flexible main area and cancel the correction.
+    const paper = reader.closest<HTMLElement>('.paper');
+    const scrolling = paper && reader.getBoundingClientRect().height > paper.clientHeight + 0.5;
+    content.style.setProperty('--contact-grid-reserve', scrolling ? offset : '0px');
 }
 
 function alignContactDividerToGrid(form: HTMLFormElement) {
@@ -162,6 +156,10 @@ function connectContactForm(form: HTMLFormElement) {
     const success = form.querySelector<HTMLElement>('[data-contact-success]')!;
     const status = form.querySelector<HTMLElement>('[data-contact-status]')!;
     const deliveryError = form.querySelector<HTMLElement>('[data-contact-delivery-error]')!;
+    const deliveryErrorText = deliveryError.querySelector<HTMLElement>(
+        '[data-contact-error-text]',
+    )!;
+    const verification = form.querySelector<HTMLElement>('[data-contact-turnstile]');
     const hint = form.querySelector<HTMLElement>('[data-contact-submit-hint]')!;
     let state: ContactState = 'editing';
     let lastEdited = controls[0];
@@ -189,14 +187,21 @@ function connectContactForm(form: HTMLFormElement) {
         form.dataset.contactState = state;
         const remaining = state === 'confirming' ? Math.max(0, readyAt - performance.now()) : 0;
         const seconds = Math.ceil(remaining / 1000);
-        const locked = state === 'confirming' || state === 'sending';
+        const verifying = state === 'verifying';
+        const locked = state === 'confirming' || verifying || state === 'sending';
         controls.forEach((control) => {
             control.readOnly = locked;
         });
         cancel.hidden = !locked;
-        cancel.disabled = state === 'sending';
+        cancel.disabled = verifying || state === 'sending';
         cancel.setAttribute('aria-disabled', String(cancel.disabled));
         submit.hidden = state === 'success' || state === 'error';
+        // Keep the buttons' layout boxes while verification occupies their slot.
+        for (const button of [cancel, submit]) {
+            button.inert = verifying;
+            button.setAttribute('aria-hidden', String(verifying));
+        }
+        if (verification) verification.hidden = !verifying;
         success.hidden = state !== 'success';
         deliveryError.hidden = state !== 'error';
         const text =
@@ -231,7 +236,7 @@ function connectContactForm(form: HTMLFormElement) {
     const edit = () => {
         clearPending();
         deliveryError.hidden = true;
-        deliveryError.textContent = '';
+        deliveryErrorText.textContent = '';
         status.textContent = '';
         render('editing');
     };
@@ -265,7 +270,7 @@ function connectContactForm(form: HTMLFormElement) {
             .contains(document.activeElement);
         edit();
         render('error');
-        deliveryError.textContent = 'Unable to send message, try again later';
+        deliveryErrorText.textContent = 'Unable to send message, try again later';
         if (shouldMoveFocus) form.closest<HTMLElement>('#contact')?.focus({ preventScroll: true });
         feedbackTimer = window.setTimeout(
             () => {
@@ -290,12 +295,14 @@ function connectContactForm(form: HTMLFormElement) {
         let timeout: number | undefined;
         try {
             if (form.dataset.turnstileSiteId) {
+                render('verifying');
                 status.textContent = 'Completing security verification.';
                 const token = await getContactToken(form, currentRequest.signal);
                 if (!token) throw new Error('Security verification is unavailable');
                 body.set('cf-turnstile-response', token);
             }
             if (request !== currentRequest || lifecycle.signal.aborted) return;
+            render('sending');
             status.textContent = 'Sending your message.';
             timeout = window.setTimeout(() => currentRequest.abort(), 15_000);
             requestTimer = timeout;
@@ -338,7 +345,7 @@ function connectContactForm(form: HTMLFormElement) {
     for (const field of fields) {
         const control = getControl(field);
         const updateControl = () => {
-            if (state === 'confirming' || state === 'sending') return;
+            if (state === 'confirming' || state === 'verifying' || state === 'sending') return;
             if (state === 'success' || state === 'error') edit();
             deliveryError.hidden = true;
             status.textContent = '';
@@ -429,9 +436,14 @@ function connectContactForm(form: HTMLFormElement) {
 
     form.noValidate = true;
     form.dataset.contactFormReady = 'true';
+    const resizeObserver = new ResizeObserver(scheduleContactAlignment);
+    const precedingContent = form.closest('.paper-sheet')?.querySelector('.page');
+    if (precedingContent) resizeObserver.observe(precedingContent);
+    resizeObserver.observe(form);
     connectedForms.set(form, {
         refresh,
         disconnect: () => {
+            resizeObserver.disconnect();
             clearPending();
             lifecycle.abort();
             render('editing');
@@ -445,6 +457,8 @@ function connectContactForm(form: HTMLFormElement) {
 }
 
 function disconnectContactForms() {
+    if (alignmentFrame !== undefined) window.cancelAnimationFrame(alignmentFrame);
+    alignmentFrame = undefined;
     connectedForms.forEach((connection) => connection.disconnect());
     connectedForms.clear();
 }
@@ -454,7 +468,15 @@ function connectContactForms() {
         connectContactForm(form);
         alignContactDividerToGrid(form);
     });
-    window.requestAnimationFrame(() => {
+    scheduleContactAlignment();
+}
+
+let alignmentFrame: number | undefined;
+
+function scheduleContactAlignment() {
+    if (alignmentFrame !== undefined) return;
+    alignmentFrame = window.requestAnimationFrame(() => {
+        alignmentFrame = undefined;
         document.querySelectorAll<HTMLFormElement>(FORM_SELECTOR).forEach((form) => {
             alignContactFormToGrid(form);
             alignContactDividerToGrid(form);

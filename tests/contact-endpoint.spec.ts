@@ -34,12 +34,14 @@ function backend(
         mailStatus?: number;
         unavailable?: boolean;
         now?: () => number;
+        reportFailure?: Parameters<typeof createContactHandler>[0]['reportFailure'];
     } = {},
 ) {
     const calls: { url: string; init: RequestInit }[] = [];
     const handler = createContactHandler({
         getConfig: () => config,
         now: options.now,
+        reportFailure: options.reportFailure,
         fetch: async (url, init) => {
             calls.push({ url: String(url), init: init! });
             if (options.unavailable) throw new Error('Private provider details');
@@ -82,6 +84,26 @@ test('verified submissions send plain text to the configured recipient with visi
     const mailHeaders = calls[1].init.headers as Record<string, string>;
     expect(mailHeaders.Authorization).toBe(`Bearer ${config.resendToken}`);
     expect(mailHeaders['Idempotency-Key']).toMatch(/^contact-[a-f0-9]{64}$/);
+});
+
+test('failure diagnostics identify the stage without logging credentials, drafts, or raw errors', async () => {
+    const failures: Record<string, unknown>[] = [];
+    const reportFailure = (failure: Record<string, unknown>) => failures.push(failure);
+    await createContactHandler({ getConfig: () => ({}), reportFailure })(submission());
+    await backend({ verification: { success: false }, reportFailure }).handler(submission());
+    await backend({
+        verification: { success: true, hostname: 'attacker.example', action: 'contact' },
+        reportFailure,
+    }).handler(submission());
+    await backend({ mailStatus: 401, reportFailure }).handler(submission());
+    await backend({ unavailable: true, reportFailure }).handler(submission());
+    expect(failures).toEqual([
+        { stage: 'configuration', reason: 'missing_or_invalid_config' },
+        { stage: 'turnstile', reason: 'invalid_token' },
+        { stage: 'turnstile', reason: 'hostname_mismatch' },
+        { stage: 'resend', reason: 'provider_rejected', status: 401 },
+        { stage: 'turnstile', reason: 'provider_unavailable' },
+    ]);
 });
 
 for (const verification of [
