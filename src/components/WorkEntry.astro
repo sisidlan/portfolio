@@ -89,7 +89,8 @@ const titleId = `${titleIdPrefix}-${work.id}`;
     }
 
     .work-entry__button {
-        margin-top: calc(var(--grid-size) * 2);
+        /* Center the button on a paper grid line, like the home hero action. */
+        margin-top: calc(var(--grid-size) * 3 - (var(--button-height) - var(--grid-line)) / 2);
     }
 
     /* ======================================================================
